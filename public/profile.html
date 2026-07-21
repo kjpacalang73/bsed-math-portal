@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile | BSED Mathematics Portal</title>
+    <!-- FontAwesome for Elegant Dashboard Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap">
+    <style>
+        :root {
+            --act-blue: #002244;
+            --act-gold: #ffcc00;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            
+            /* Sidebar Widths */
+            --sidebar-collapsed-width: 75px;
+            --sidebar-expanded-width: 300px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-dark);
+            display: flex;
+            min-height: 100vh;
+            
+            /* 3. LOGIN PAGE BACKGROUND COPIED HERE */
+            /* Replace the URL placeholder below with your actual login page header background image path */
+            background: linear-gradient(rgba(0, 34, 68, 0.85), rgba(0, 34, 68, 0.85)), 
+                        url('https://lh3.googleusercontent.com/d/1mE3LrHYGmFZ0jgP9k4giyPypXAKnMjLl') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        /* --- COLLAPSIBLE SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-collapsed-width);
+            background-color: var(--act-blue);
+            color: white;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 4px solid var(--act-gold);
+            z-index: 100;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        /* Sidebar Expanded State class triggered by JS */
+        .sidebar.expanded {
+            width: var(--sidebar-expanded-width);
+        }
+
+        /* Toggle Menu Button at the Top Left */
+        .sidebar-toggle-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            padding: 1.5rem;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        
+        .sidebar.expanded .sidebar-toggle-btn {
+            justify-content: flex-end;
+            padding-right: 1.5rem;
+        }
+
+        .sidebar-toggle-btn:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--act-gold);
+        }
+
+        /* 2. INSTITUTIONAL HEADER INFO AREA */
+        .sidebar-brand-block {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            height: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        /* Show branding only when sidebar is expanded */
+        .sidebar.expanded .sidebar-brand-block {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            height: auto;
+        }
+
+        /* School Logo Frame */
+        .school-logo {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+            margin-bottom: 0.75rem;
+        }
+
+        .school-name {
+            font-family: 'Great Vibes', cursive;
+            font-size: 1.09rem;
+            font-weight: 700;
+            color: var(--act-gold);
+            line-height: 1.2;
+        }
+
+        .former-name {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+            margin-top: 0.2rem;
+        }
+
+        .school-motto {
+            font-family:'Times New Roman', Times, serif;
+            font-size: 0.75rem;
+            color: white;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            margin-top: 0.4rem;
+            font-style:italic
+        }
+
+        .dept-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+            text-transform: uppercase;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
+            margin-top: 0.75rem;
+            width: 100%;
+        }
+
+        /* Navigation Menu Links */
+        .sidebar-menu {
+            flex: 1;
+            padding: 1.5rem 0;
+            list-style: none;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.9rem 1.5rem;
+            color: rgba(255, 255, 255, 0.75);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .sidebar-menu a i {
+            font-size: 1.2rem;
+            width: 40px; /* Gives centered anchor point when collapsed */
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .sidebar-menu span {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease;
+        }
+
+        .sidebar.expanded .sidebar-menu span {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar-menu li.active a,
+        .sidebar-menu a:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .sidebar-menu li.active a {
+            color: var(--act-gold);
+            font-weight: 600;
+            box-shadow: inset 4px 0 0 var(--act-gold);
+        }
+
+        /* 3. LOGOUT AT VERY BOTTOM */
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logout-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            justify-content: center;
+        }
+
+        .sidebar:not(.expanded) .logout-btn span {
+            display: none;
+        }
+
+        .logout-btn:hover {
+            background-color: #e11d48;
+            border-color: #e11d48;
+            color: white;
+        }
+
+        /* --- MAIN DASHBOARD BODY AREA --- */
+.main-content {
+    margin-left: var(--sidebar-collapsed-width);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* ADDED FROM STEP 1 */
+    padding-top: 0; 
+}
+
+/* Shift content layout dynamically when menu expands */
+body:has(.sidebar.expanded) .main-content {
+    margin-left: var(--sidebar-expanded-width);
+}
+
+/* --- ADD THE REST OF STEP 1 RIGHT HERE --- */
+
+.welcome-header {
+     font-family:'Times New Roman', Times, serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    width: 100%;
+    display: block;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    font-style: italic;
+}
+
+.profile-card {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-card.collapsed {
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-collapsed-width);
+    right: 0;
+    border-radius: 0;
+    padding: 0.75rem 2rem;
+    margin-bottom: 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    gap: 1.75rem;
+}
+
+body:has(.sidebar.expanded) .profile-card.collapsed {
+    left: var(--sidebar-expanded-width);
+}
+
+.profile-pic-frame {
+    width: 140px;
+    height: 140px;
+    border-radius: 8px;
+    border: 3px solid var(--act-blue);
+    overflow: hidden;
+    flex-shrink: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-pic-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.profile-card.collapsed .profile-pic-frame {
+    width: 100px;
+    height: 100px;
+    border-width: 3px;
+}
+
+.profile-summary {
+    flex: 1;
+    transition: all 0.3s ease;
+}
+
+.profile-card.collapsed .profile-summary {
+    display: flex;
+    flex-direction:column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding-top: 0.1rem;
+}
+
+.profile-summary h1 {
+    font-size: 1.35rem;
+    color: var(--act-blue);
+    margin-bottom: 0.4rem;
+    font-weight: 700;
+    transition: all 0.4s ease;
+}
+
+.profile-card.collapsed .profile-summary h1 {
+    font-size: 2rem;
+    margin-bottom: 0;
+}
+
+.profile-card.collapsed .profile-summary p:has(#student_email) {
+    display: none;
+}
+
+.status-tags {
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+    transition: all 0.4s ease;
+}
+
+.profile-card.collapsed .status-tags {
+    margin-top: 0;
+}
+
+/* --- UPDATED CONTAINER SPACING --- */
+.container {
+    flex: 1;
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto;
+    padding-top: 2rem; /* Updated layout top clearance */
+}
+
+.badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.35rem 0.85rem;
+    border-radius: 50px;
+    text-transform: uppercase;
+}
+
+.badge-blue { background-color: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+.badge-green { background-color: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+
+        .info-section {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            color: var(--act-blue);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: var(--act-gold);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .info-box {
+            background-color: #f8fafc;
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            border: 1px solid #edf2f7;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        footer {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-top: 1px solid #e2e8f0;
+            padding: 0.5rem 1.25rem;
+            text-align: center; 
+            font-size: 0.85rem; 
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+
+        footer div {
+    margin-bottom: 0.25rem;
+}
+footer div:last-child {
+    margin-bottom: 0;
+}
+.motto-cursive {
+    font-family: 'Great Vibes', cursive;
+    font-size: 1.2rem;
+    margin-top: 0.4rem;
+}
+
+        @media (max-width: 768px) {
+    /* Hide the sidebar completely off-screen by default on phones */
+    .sidebar { 
+        width: 280px !important; 
+        position: fixed !important; 
+        left: -280px; /* Hidden off the left edge */
+        z-index: 1000;
+        transition: left 0.3s ease;
+    }
+    
+    /* When a special class 'active' is added, slide the sidebar into view */
+    .sidebar.active {
+        left: 0 !important;
+    }
+
+    /* Force the main profile content to take up the full screen width */
+    .main-content { 
+        margin-left: 0 !important; 
+        width: 100% !important;
+        padding: 10px !important;
+        padding-top: 20px !important; /* Adjust this value if needed to clear your mobile header height */
+    }
+
+    /* Make the top profile bar layout fit beautifully on small screens */
+    .profile-card.collapsed {
+        position: fixed !important; /* Pins it to the viewport */
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 998; /* Sits right beneath the sidebar overlay layer */
+        flex-direction: column !important;
+        text-align: center !important;
+        padding: 1rem !important;
+        background-color: rgba(255, 255, 255, 0.98) !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+    }
+    
+    .profile-card.collapsed ~ .main-content { 
+        padding-top: 220px !important; 
+    }
+
+    .profile-card.collapsed .profile-pic-frame {
+        margin: 0 auto !important;
+    }
+
+    /* Create a dark background overlay when the mobile sidebar opens */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+    }
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    .mobile-menu-trigger {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 25px;
+        left: 0; 
+        width: 48px;
+        height: 42px;
+        background-color: #0b284c; 
+        color: #ffffff;
+        border: none;
+        border-radius: 0 8px 8px 0; 
+        font-size: 1.2rem;
+        cursor: pointer;
+        z-index: 997;
+        box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.25);
+        padding-right: 6px; 
+    }
+
+    .trigger-gold-line {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background-color: #e2a812; 
+    }
+} /* <--- This is the final closing bracket of your media query */
+
+/* Add this right underneath the media query to make sure it's hidden on desktops */
+@media (min-width: 769px) {
+    .mobile-menu-trigger {
+        display: none !important;
+    }
+}
+
+/* --- LAYER CORRECTIONS --- */
+.welcome-header {
+    z-index: 6; /* Pushes welcome text above the shield */
+}
+
+.profile-card {
+    z-index: 7; /* Pushes the card to the absolute top layer */
+}
+
+    /* Make the profile picture look clickable */
+.profile-pic-frame img {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+.profile-pic-frame img:hover {
+    transform: scale(1.05); /* Subtle zoom effect on hover */
+}
+
+/* Lightbox Background Overlay */
+.image-lightbox {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 9999; /* Higher than everything else */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); /* Smooth dark backdrop */
+    backdrop-filter: blur(5px);
+    justify-content: center;
+    align-items: center;
+}
+
+/* Lightbox Image */
+.image-lightbox img {
+    max-width: 85%;
+    max-height: 85%;
+    border-radius: 12px;
+    border: 4px solid var(--act-gold);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    transform: scale(0.7);
+    transition: transform 0.3s ease;
+}
+
+/* Zoom animation when active */
+.image-lightbox.active img {
+    transform: scale(1);
+}
+
+/* Close button corner styling */
+.lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+    </style>
+</head>
+<body>
+
+    <button class="mobile-menu-trigger" onclick="toggleMobileSidebar()">
+        <i class="fa-solid fa-bars"></i>
+        <div class="trigger-gold-line"></div>
+    </button>
+
+    <!-- LEFT SIDEBAR NAVIGATION PANEL (COLLAPSIBLE) -->
+   <nav class="sidebar" id="dashboardSidebar">
+    <!-- Keep this: This is your desktop toggle button, but we add toggleMobileSidebar to it too! -->
+    <button class="sidebar-toggle-btn" onclick="toggleSidebar(); toggleMobileSidebar();">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- School Detailed Branding -->
+    <div class="sidebar-brand-block">
+        <!-- THE DUPLICATE ICON WAS REMOVED FROM HERE -->
+        
+        <img class="school-logo" src="https://lh3.googleusercontent.com/d/1s1s802Y7n5PgAX4dLZ6cZzRhYhN_ofTA" alt="School Logo">
+        <div class="school-name">Adventist College of Technology, Inc.</div>
+        <div class="former-name">(Formerly: Matutum View Christian College)</div>
+        <div class="school-motto">"An Institution of Faith and Skills Development"</div>
+        <div class="dept-title">BSED Mathematics Department</div>
+    </div>
+        
+        <!-- Menu Items -->
+        <ul class="sidebar-menu">
+            <li class="active">
+                <a href="/profile.html">
+                    <i class="fa-solid fa-user"></i>
+                    <span>Student Profile</span>
+                </a>
+            </li>
+            <li>
+                <!-- Replace your current line 662 with this: -->
+                <a href="javascript:void(0)" onclick="goToAcademicRecords()" class="nav-link">
+                    <i class="fa-solid fa-graduation-cap"></i> 
+                <span>Academic Records</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Bottom Logout Option -->
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Log Out</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- RIGHT CONTENT AREA -->
+    <main class="main-content">
+        <!-- Scroll detection anchor -->
+        <div id="scroll-anchor" style="position: absolute; top: 0; height: 1px; width: 1px;"></div>
+        <div class="container">
+            <h1 class="welcome-header">Welcome, ACTInian!</h1>
+            
+            <!-- Profile Header Card -->
+            <div class="profile-card">
+                <div class="profile-pic-frame">
+                    <img id="student_photo" src="https://placehold.co/150?text=Loading..." alt="Student Picture" onclick="openImageMagnifier()">
+                </div>
+                <div class="profile-summary">
+                    <h1 id="student_name">Loading Name...</h1>
+                    <p>Student ID: <strong id="student_id">Loading...</strong></p>
+                    <p>Email: <span id="student_email">Loading...</span></p>
+                    <div class="status-tags">
+                        <span class="badge badge-blue" id="student_year">Loading Year</span>
+                        <span class="badge badge-green" id="student_status">Active</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Academic Affiliation -->
+            <div class="info-section">
+                <div class="section-title">
+                    <i class="fa-solid fa-university"></i> Academic Status
+                </div>
+                <div class="info-grid">
+                    <div class="info-box">
+                        <div class="info-label">Degree Program</div>
+                        <div class="info-value">Bachelor of Secondary Education Major in Mathematics</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Classification Status</div>
+                        <div class="info-value" id="grid_status">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Profile Data -->
+            <div class="info-section">
+                <div class="section-title">
+                    <i class="fa-solid fa-id-card"></i> Personal Information
+                </div>
+                <div class="info-grid">
+                    <div class="info-box">
+                        <div class="info-label">Gender / Sex</div>
+                        <div class="info-value" id="grid_gender">Loading...</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Date of Birth</div>
+                        <div class="info-value" id="grid_dob">Loading...</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Place of Birth</div>
+                        <div class="info-value" id="grid_pob">Loading...</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Religious Affiliation</div>
+                        <div class="info-value" id="grid_religion">Loading...</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Mobile Contact Number</div>
+                        <div class="info-value" id="grid_mobile">Loading...</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Ethnicity / Cultural Group</div>
+                        <div class="info-value" id="grid_ethnicity">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Mapping -->
+            <div class="info-section">
+                <div class="section-title">
+                    <i class="fa-solid fa-map-location-dot"></i> Contact Address
+                </div>
+                <div class="info-grid" style="grid-template-columns: 1fr;">
+                    <div class="info-box">
+                        <div class="info-label">Current Present Address</div>
+                        <div class="info-value" id="grid_address">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parent & Guardian Profiles -->
+            <div class="info-section">
+                <div class="section-title">
+                    <i class="fa-solid fa-users"></i> Family Background
+                </div>
+                <div class="info-grid">
+                    <div class="info-box">
+                        <div class="info-label">Father's Complete Name</div>
+                        <div class="info-value" id="grid_father">Loading...</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Father's Religion</div>
+                        <div class="info-value" id="grid_father_rel">Loading...</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Mother's Full Maiden Name</div>
+                        <div class="info-value" id="grid_mother">Loading...</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Mother's Religion</div>
+                        <div class="info-value" id="grid_mother_rel">Loading...</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Designated Emergency Guardian</div>
+                        <div class="info-value" id="grid_guardian">Loading...</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Guardian Contact Number</div>
+                        <div class="info-value" id="grid_guardian_contact">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
+        <!-- System Footer -->
+        <footer>
+            <div>&copy; 2026 Adventist College of Technology, Inc. | BSED Mathematics Department</div>
+            <div>All Rights Reserved.</div>
+            <div class="motto-cursive">To God be the Glory!</div>
+        </footer>
+    </main>
+
+    <!-- JavaScript to Handle Layout and Data Fetching -->
+    <script>
+        // Update this string to your actual database row test ID
+        // 1. Retrieve the ID saved by your login script
+const params = new URLSearchParams(window.location.search);
+        let studentId = params.get('id');
+        
+        if (!studentId || studentId === 'Loading...' || studentId.trim() === '') {
+            studentId = sessionStorage.getItem('student_id');
+        } else {
+            sessionStorage.setItem('student_id', studentId);
+        }
+
+// 2. Add a simple security check to make sure they are logged in
+if (!studentId) {
+    alert("Please log in to view your profile.");
+    window.location.href = "/"; // Change this to your login page path
+}
+
+fetch(`/api/profile/${studentId}`) 
+    .then(response => response.json())
+    .then(data => {
+        // Your code to fill the HTML with student data goes here
+    }); 
+
+        // 1. Sidebar Toggle Mechanics
+        function toggleSidebar() {
+            const sidebar = document.getElementById('dashboardSidebar');
+            sidebar.classList.toggle('expanded');
+        }
+
+        // 2. Fetch Profile from Backend Pipeline
+        async function loadProfile() {
+            try {
+                const response = await fetch(`/api/profile/${studentId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const student = data.profile;
+                    
+                    document.getElementById('student_photo').src = student.photo_url || 'https://placehold.co/150?text=No+Photo';
+                    document.getElementById('student_name').innerText = student.name;
+                    document.getElementById('student_id').innerText = student.student_id;
+                    document.getElementById('student_email').innerText = student.email;
+                    document.getElementById('student_year').innerText = student.year_level;
+                    
+                    document.getElementById('grid_status').innerText = student.academic_status;
+                    document.getElementById('grid_gender').innerText = student.gender;
+                    document.getElementById('grid_dob').innerText = new Date(student.date_of_birth).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+                    document.getElementById('grid_pob').innerText = student.place_of_birth;
+                    document.getElementById('grid_religion').innerText = student.religion;
+                    document.getElementById('grid_mobile').innerText = student.mobile_number;
+                    document.getElementById('grid_ethnicity').innerText = student.ethnicity;
+                    document.getElementById('grid_address').innerText = student.present_address;
+                    
+                    document.getElementById('grid_father').innerText = student.father_name;
+                    document.getElementById('grid_father_rel').innerText = student.father_religion;
+                    document.getElementById('grid_mother').innerText = student.mother_maiden;
+                    document.getElementById('grid_mother_rel').innerText = student.mother_religion;
+                    document.getElementById('grid_guardian').innerText = student.guardian_name;
+                    document.getElementById('grid_guardian_contact').innerText = student.guardian_contact;
+
+                } else {
+                    alert("Dashboard Fetch Failure: " + data.message);
+                }
+            } catch (err) {
+                console.error("Dashboard Loading Error:", err);
+            }
+        }
+
+        // Dynamic Profile Card Collapse Mechanic
+function initHeaderScrollWatcher() {
+    const profileCard = document.querySelector('.profile-card');
+    const welcomeHeader = document.querySelector('.welcome-header');
+    
+    if (!profileCard) return;
+
+    window.addEventListener('scroll', () => {
+        // As soon as user scrolls past 60 pixels
+        if (window.scrollY > 60) {
+            profileCard.classList.add('collapsed');
+            if (welcomeHeader) {
+                welcomeHeader.style.opacity = '0';
+                welcomeHeader.style.visibility = 'hidden';
+            }
+        } else {
+            profileCard.classList.remove('collapsed');
+            if (welcomeHeader) {
+                welcomeHeader.style.opacity = '1';
+                welcomeHeader.style.visibility = 'visible';
+            }
+        }
+    });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    initHeaderScrollWatcher();
+});
+
+        function logout() {
+            if(confirm("Are you sure you want to securely log out of your student portal session?")) {
+                sessionStorage.removeItem('student_id');
+                window.location.href = "/";
+            }
+        }
+
+        window.onload = loadProfile;
+
+        function openImageMagnifier() {
+    const currentPhotoSrc = document.getElementById('student_photo').src;
+    // Don't open if it's still loading the placeholder image
+    if (currentPhotoSrc.includes('placehold.co')) return; 
+
+    const modal = document.getElementById('imageModal');
+    const magnifiedImg = document.getElementById('magnifiedImage');
+    
+    magnifiedImg.src = currentPhotoSrc;
+    modal.style.display = 'flex';
+    
+    // Tiny delay to allow CSS scale transition to glide smoothly
+    setTimeout(() => {
+        modal.classList.add('active');
+    }, 10);
+}
+
+function closeImageMagnifier() {
+    const modal = document.getElementById('imageModal');
+    modal.classList.remove('active');
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 300); // Matches the 0.3s CSS transition speed
+}
+
+function toggleMobileSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+}
+
+function goToAcademicRecords() {
+        // Find the element that shows the ID on your profile page
+        const idElement = document.getElementById('student_id');
+        
+        if (idElement) {
+            const studentId = idElement.innerText.trim();
+            // Redirect the browser to the academic records page with the ID
+            window.location.href = `academic-records.html?id=${encodeURIComponent(studentId)}`;
+        } else {
+            alert("Error: Could not find Student ID.");
+        }
+    }
+
+// This runs after the page loads to update the link with the current student's ID
+    window.addEventListener('DOMContentLoaded', () => {
+        // Change 'studentIdDisplay' to whatever the ID of the element 
+        // showing the ID on your profile page is
+        const idElement = document.getElementById('studentIdDisplay'); 
+        const link = document.getElementById('academicRecordsLink');
+        
+        if (idElement && link) {
+            const studentId = idElement.innerText;
+            link.href = `academic-records.html?id=${encodeURIComponent(studentId)}`;
+        }
+    });
+
+    </script>
+
+    <!-- Image Magnifier Modal Overlay -->
+<div id="imageModal" class="image-lightbox" onclick="closeImageMagnifier()">
+    <span class="lightbox-close">&times;</span>
+    <img id="magnifiedImage" src="" alt="Enlarged Student Photo">
+</div>
+</body>
+</html>

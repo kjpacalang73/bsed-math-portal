@@ -1,0 +1,344 @@
+/* RESET & FONTS */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f4f6f9;
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* TOP HEADER */
+.top-header {
+    background-image: linear-gradient(rgba(3, 43, 105, 0.85), rgba(3, 43, 105, 0.85)), url('https://lh3.googleusercontent.com/d/1mE3LrHYGmFZ0jgP9k4giyPypXAKnMjLl');
+    background-size: cover;
+    background-position: center;
+    color: #ffffff;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 5px solid #FFC107; /* Gold accent line */
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+}
+
+.school-titles h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    line-height: 1.2;
+    letter-spacing: 0.5px;
+}
+
+.subtitle {
+    font-size: 0.95rem;
+    color: #e0e0e0;
+    font-style: italic;
+    margin-top: 2px;
+}
+
+.motto {
+    font-size: 0.9rem;
+    color: #FFC107;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.header-right {
+    font-size: 0.85rem;
+    text-align: right;
+    line-height: 1.6;
+    color: #f0f4f8;
+}
+
+/* LOGIN MAIN CONTAINER */
+.login-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.login-card {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 450px;
+    border-top: 4px solid #032B69;
+}
+
+.login-card h2 {
+    color: #032B69;
+    font-size: 1.4rem;
+    text-align: center;
+    margin-bottom: 25px;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+/* INPUT FIELDS */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 6px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccd4e0;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #032B69;
+    box-shadow: 0 0 0 3px rgba(3, 43, 105, 0.15);
+}
+
+/* BUTTONS */
+.primary-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #032B69;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    margin-top: 10px;
+}
+
+.primary-btn:hover {
+    background-color: #021d47;
+}
+
+.toggle-text {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* FOOTER & MISSION/VISION PILLARS */
+footer {
+    background-image: linear-gradient(rgba(1, 22, 56, 0.9), rgba(1, 22, 56, 0.9)), url('https://lh3.googleusercontent.com/d/1g9ZQn60WdVOU6TyallLidFy7iKqsX0bu');
+    background-size: cover;
+    background-position: center;
+    color: #ffffff;
+    padding: 30px 20px 15px 20px;
+}
+
+.footer-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-cards .card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.footer-cards .card h3 {
+    color: #FFC107;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+}
+
+.footer-cards .card p {
+    font-size: 0.85rem;
+    color: #d0d8e4;
+    line-height: 1.5;
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 25px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 15px;
+}
+
+.glory-text {
+    font-style: italic;
+    color: #FFC107;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 768px) {
+    .top-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .header-left {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .header-right {
+        text-align: center;
+    }
+}
+
+/* REGISTRATION PAGE LAYOUT OPTIMIZATIONS */
+
+/* 1. Center the form title */
+.register-card h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #032B69;
+    font-size: 1.8rem;
+    letter-spacing: 0.5px;
+}
+
+/* 2. Constrain container width and center it on the screen with healthy side margins */
+.auth-container {
+    padding: 40px 20px;
+    max-width: 1200px; /* Prevents the fields from stretching infinitely horizontally */
+    margin: 0 auto;    /* Centers the whole block horizontally */
+    width: 90%;        /* Acts as the side safety margin on medium sized monitors */
+}
+
+/* Refine the inner registration card styling */
+.auth-card.register-card {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Table Styles */
+.records-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.records-table th {
+    background-color: #002366; /* Matching your blue header */
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+.records-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.semester-title {
+    margin-top: 20px;
+    color: #002366;
+    border-bottom: 2px solid #002366;
+    padding-bottom: 5px;
+}
+
+/* Layout the profile card elements side-by-side */
+.profile-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+/* Constrain the image frame */
+.profile-pic-frame {
+    width: 150px;
+    height: 150px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+}
+
+/* Force the image to fill the frame without distorting */
+.profile-card {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+    display: flex;
+    margin: 0;
+}
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    margin-left: 250px; /* Adjust this to match your sidebar width */
+}
+
+.profile-pic-frame {
+    width: 140px;
+    height: 140px;
+    border-radius: 8px;
+    border: 3px solid var(--act-blue);
+    overflow: hidden;
+    flex-shrink: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Grades</title>
+    <style>
+        body { margin: 0; padding: 0; min-height: 100vh; background: url('https://lh3.googleusercontent.com/d/1mE3LrHYGmFZ0jgP9k4giyPypXAKnMjLl') no-repeat center center fixed; background-size: cover; font-family: sans-serif; }
+        body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: -1; }
+
+        /* Profile Card Styling */
+        .student-header { background: white; padding: 20px; margin: 20px auto; width: 95%; border-radius: 10px; display: flex; align-items: center; gap: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .student-img { width: 100px; height: 100px; border-radius: 10px; border: 2px solid #002366; object-fit: cover; }
+        .info-container h1 { margin: 0; color: #002366; font-size: 24px; }
+        .badge-container { margin-top: 10px; }
+        .badge { padding: 5px 12px; border-radius: 15px; font-size: 0.8em; font-weight: bold; border: 1px solid #002366; color: #002366; margin-right: 5px; }
+
+        /* Grades Table */
+        .grades-table { background: white; width: 95%; margin: 0 auto 20px auto; border-collapse: collapse; border-radius: 0 0 10px 10px; overflow: hidden; }
+        .grades-table th { background: #002366; color: white; padding: 15px; text-align: left; }
+        .grades-table td { padding: 12px; border-bottom: 1px solid #ddd; }
+
+        .grade-input { width: 80px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <!-- Header Box -->
+    <div class="student-header">
+        <img id="studentPhoto" src="https://via.placeholder.com/100" alt="Student" class="student-img">
+        <div class="info-container">
+            <h1 id="studentName">Loading Name...</h1>
+            <p>Student ID: <span id="studentIdDisplay">Loading...</span></p>
+            <div class="badge-container">
+                <span class="badge" id="studentYear">YEAR</span>
+                <span class="badge" id="studentStatus">STATUS</span>
+            </div>
+        </div>
+    </div>
+
+    <table class="grades-table">
+        <thead>
+            <tr><th>Code</th><th>Descriptive Title</th><th>Units</th><th>Grade</th></tr>
+        </thead>
+        <tbody id="gradesBody"></tbody>
+    </table>
+
+    <!-- Navigation and Action Buttons -->
+<div style="text-align: center; margin: 20px;">
+    <button onclick="window.location.href='/admin.html'" 
+            style="padding: 10px 20px; background-color: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        Back to Admin
+    </button>
+    
+    <button onclick="saveGrades()" 
+            style="padding: 10px 30px; background-color: #002366; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+        Save Grades
+    </button>
+</div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const studentId = params.get('id');
+
+       // Add this to your <script> section
+async function loadStudentProfile() {
+    if (!studentId) return;
+
+    try {
+        // 1. Fetch Profile
+        const profileResponse = await fetch(`/api/profile/${encodeURIComponent(studentId)}`);
+        const profileData = await profileResponse.json();
+
+        if (profileData.success && profileData.profile) {
+            const student = profileData.profile;
+            document.getElementById('studentName').innerText = student.name || 'N/A';
+            document.getElementById('studentIdDisplay').innerText = student.student_id || 'N/A';
+            document.getElementById('studentYear').innerText = student.year_level || 'N/A';
+            document.getElementById('studentStatus').innerText = student.academic_status || 'N/A';
+            // In your loadStudentProfile function, ensure this check exists:
+if (student.photo_url) {
+    document.getElementById('studentPhoto').src = student.photo_url;
+} else {
+    // Optional: set a default image if none is found
+    document.getElementById('studentPhoto').src = 'https://via.placeholder.com/100';
+}
+        }
+
+        // 2. Fetch Curriculum + Grades
+        const curriculumResponse = await fetch(`/api/get-curriculum-with-grades/${encodeURIComponent(studentId)}`);
+        const curriculumData = await curriculumResponse.json();
+
+        if (curriculumData.success) {
+            const tbody = document.getElementById('gradesBody');
+            tbody.innerHTML = ''; // Clear current
+
+            curriculumData.data.forEach(item => {
+                const row = `<tr>
+                    <td>${item.course_code}</td>
+                    <td>${item.descriptive_title}</td>
+                    <td>${item.units}</td>
+                    <td>
+                        <input type="text" class="grade-input" 
+                               data-code="${item.course_code}" 
+                               data-title="${item.descriptive_title}"
+                               data-units="${item.units}"
+                               value="${item.grade || ''}" 
+                               placeholder="Enter Grade">
+                    </td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+    } catch (error) {
+        console.error("Loading Error:", error);
+    }
+}
+
+async function saveGrades() {
+    const inputs = document.querySelectorAll('.grade-input');
+    const records = [];
+
+    inputs.forEach(input => {
+        records.push({
+            student_id: studentId, // Ensure 'studentId' is defined in your script scope
+            course_code: input.getAttribute('data-code'),
+            descriptive_title: input.getAttribute('data-title'),
+            units: input.getAttribute('data-units'),
+            grade: input.value
+        });
+    });
+
+    try {
+        const response = await fetch('/api/save-grades', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ records })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            alert('Grades saved successfully!');
+        } else {
+            alert('Error saving grades: ' + result.message);
+        }
+    } catch (error) {
+        console.error("Save Error:", error);
+    }
+}
+
+        loadStudentProfile();
+    </script>
+</body>
+</html>

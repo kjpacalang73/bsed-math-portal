@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACTI - Student Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- HEADER SECTION -->
+    <header class="top-header">
+        <div class="header-left">
+            <!-- You can replace logo.png with your actual logo file later -->
+            <img src="https://lh3.googleusercontent.com/d/1s1s802Y7n5PgAX4dLZ6cZzRhYhN_ofTA" alt="ACTI Logo" class="logo">
+            <div class="school-titles">
+                <h1>Adventist College of Technology, Inc.</h1>
+                <p class="subtitle">(Formerly: Matutum View Christian College)</p>
+                <p class="motto">"An Institution of Faith and Skills Development"</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <p>📍 Prk. 4, Brgy. Acmonan, Tupi, South Cotabato</p>
+            <p>🌐 acti-edu.ph</p>
+            <p>🔵 Adventist College of Technology, Inc.</p>
+        </div>
+    </header>
+
+    <!-- MAIN APPLICATION CONTAINER (Login Only) -->
+    <main class="login-container">
+        <div class="login-card" id="login-card">
+            <h2>STUDENT SECURE LOGIN</h2>
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="login_student_id">Student ID</label>
+                    <input type="text" id="login_student_id" placeholder="SEM-25-XXXX" required>
+                </div>
+                <div class="input-group">
+                    <label for="login_password">PIN / Password</label>
+                    <input type="password" id="login_password" placeholder="••••" required>
+                </div>
+                <button type="submit" class="primary-btn">Access Records</button>
+            </form>
+            <p class="toggle-text">
+                New student? <a href="signup.html" class="toggle-link" style="text-decoration: none;">Sign up here</a>
+            </p>
+        </div>
+    </main>
+
+    <!-- FOOTER SECTION (Vision, Mission, etc.) -->
+    <footer>
+        <div class="footer-cards">
+            <div class="card">
+                <h3>VISION</h3>
+                <p>Producing competent graduates in service to God and humanity.</p>
+            </div>
+            <div class="card">
+                <h3>MISSION</h3>
+                <p>Providing Christ-Centered, holistic Adventist Education.</p>
+            </div>
+            <div class="card">
+                <h3>PHILOSOPHY</h3>
+                <p>God is the true source of Adventist Education for life and eternity.</p>
+            </div>
+            <div class="card">
+                <h3>GOAL</h3>
+                <p>Ensuring quality teacher training and skills development.</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="glory-text">To God be all the Glory!</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

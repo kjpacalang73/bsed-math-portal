@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACTI - Student Registration</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- HEADER SECTION -->
+        <header class="top-header">
+        <div class="header-left">
+            <!-- You can replace logo.png with your actual logo file later -->
+            <img src="https://lh3.googleusercontent.com/d/1s1s802Y7n5PgAX4dLZ6cZzRhYhN_ofTA" alt="ACTI Logo" class="logo">
+            <div class="school-titles">
+                <h1>Adventist College of Technology, Inc.</h1>
+                <p class="subtitle">(Formerly: Matutum View Christian College)</p>
+                <p class="motto">"An Institution of Faith and Skills Development"</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <p>📍 Prk. 4, Brgy. Acmonan, Tupi, South Cotabato</p>
+            <p>🌐 acti-edu.ph</p>
+            <p>🔵 Adventist College of Technology, Inc.</p>
+        </div>
+    </header>
+
+    <!-- TWO COLUMN REGISTRATION CONTAINER -->
+    <main class="auth-container">
+        <div class="auth-card register-card" id="register-card">
+            <h2>STUDENT PORTAL REGISTRATION</h2>
+            <form id="registration-form">
+                
+                <div class="form-grid">
+                    <!-- Column 1 -->
+                    <div class="form-column">
+                        <div class="input-group">
+                            <label for="reg_email">Email Address</label>
+                            <input type="email" id="reg_email" placeholder="student@gmail.com" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg_id_number">ID Number</label>
+                            <input type="text" id="reg_id_number" placeholder="SEM-25-XXXX-XXXX" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg_name">Full Name (Last Name, FirstName Middle Name)</label>
+                            <input type="text" id="reg_name" placeholder="Dela Cruz, Juan Central" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg_year">Year Level</label>
+                            <select id="reg_year" required>
+                                <option value="" disabled selected>Select Year Level</option>
+                                <option value="First Year">First Year</option>
+                                <option value="Second Year">Second Year</option>
+                                <option value="Third Year">Third Year</option>
+                                <option value="Fourth Year">Fourth Year</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg_status">Academic Status</label>
+                            <select id="reg_status" required>
+                                <option value="" disabled selected>Select Status</option>
+                                <option value="Regular">Regular</option>
+                                <option value="Irregular">Irregular</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg_gender">Gender</label>
+                            <select id="reg_gender" required>
+                                <option value="" disabled selected>Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg_dob">Date of Birth</label>
+                            <input type="date" id="reg_dob" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg_pob">Place of Birth</label>
+                            <input type="text" id="reg_pob" placeholder="City/Municipality" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg_address">Present Address</label>
+                            <input type="text" id="reg_address" placeholder="Barangay, Town, Province" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg_religion">Religion</label>
+                            <input type="text" id="reg_religion" placeholder="e.g. Seventh-day Adventist" required>
+                        </div>
+                    </div>
+
+                    <!-- Column 2 -->
+                    <div class="form-column">
+                        <div class="input-group">
+                            <label for="reg_mobile">Mobile Number</label>
+                            <input type="tel" id="reg_mobile" placeholder="09XXXXXXXXX" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg_ethnicity">Ethnicity</label>
+                            <input type="text" id="reg_ethnicity" placeholder="e.g. B'laan, Ilonggo, Cebuano" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg_father">Father's Full Name</label>
+                            <input type="text" id="reg_father" placeholder="Last Name, First Name" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg_father_rel">Father's Religion</label>
+                            <input type="text" id="reg_father_rel" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg_mother">Mother's Maiden Name</label>
+                            <input type="text" id="reg_mother" placeholder="Maiden Last Name, First Name" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg_mother_rel">Mother's Religion</label>
+                            <input type="text" id="reg_mother_rel" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg_guardian">Guardian's Name (N/A if none)</label>
+                            <input type="text" id="reg_guardian" value="N/A" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg_guardian_contact">Parent/Guardian Contact Number</label>
+                            <input type="tel" id="reg_guardian_contact" placeholder="09XXXXXXXXX" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg_password">Create Password</label>
+                            <input type="password" id="reg_password" placeholder="••••" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg_confirm_password">Confirm Password</label>
+                            <input type="password" id="reg_confirm_password" placeholder="••••" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1x1 Photo ID Upload Section -->
+                <div class="input-group upload-section">
+                    <label for="reg_photo" class="upload-label">
+                        📸 Upload 1x1 Formal Photo ID (JPEG/PNG)
+                    </label>
+                    <input type="file" id="reg_photo" accept="image/*" required>
+                </div>
+
+                <button type="submit" class="primary-btn">Register & Create Account</button>
+            </form>
+            <p class="toggle-text">
+                Already registered? <a href="/" class="toggle-link" style="text-decoration: none;">Login here</a>
+            </p>
+        </div>
+    </main>
+
+    <!-- FOOTER SECTION -->
+    <footer>
+        <div class="footer-cards">
+            <div class="card">
+                <h3>VISION</h3>
+                <p>Producing competent graduates in service to God and humanity.</p>
+            </div>
+            <div class="card">
+                <h3>MISSION</h3>
+                <p>Providing Christ-Centered, holistic Adventist Education.</p>
+            </div>
+            <div class="card">
+                <h3>PHILOSOPHY</h3>
+                <p>God is the true source of Adventist Education for life and eternity.</p>
+            </div>
+            <div class="card">
+                <h3>GOAL</h3>
+                <p>Ensuring quality teacher training and skills development.</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="glory-text">To God be all the Glory!</p>
+        </div>
+    </footer>
+
+    <!-- LINK THE REGISTRATION SCRIPT -->
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Records | BSED Mathematics Portal</title>
+    <!-- FontAwesome for Elegant Dashboard Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap">
+    <!-- Include jsPDF and html2canvas libraries for precise PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --act-blue: #002244;
+            --act-gold: #ffcc00;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            
+            /* Sidebar Widths */
+            --sidebar-collapsed-width: 75px;
+            --sidebar-expanded-width: 300px;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-dark);
+            display: flex;
+            min-height: 100vh;
+            background: linear-gradient(rgba(0, 34, 68, 0.85), rgba(0, 34, 68, 0.85)), 
+                        url('https://lh3.googleusercontent.com/d/1mE3LrHYGmFZ0jgP9k4giyPypXAKnMjLl') no-repeat center center fixed;
+            background-size: cover;
+        }
+        /* --- COLLAPSIBLE SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-collapsed-width);
+            background-color: var(--act-blue);
+            color: white;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 4px solid var(--act-gold);
+            z-index: 100;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        .sidebar.expanded {
+            width: var(--sidebar-expanded-width);
+        }
+        .sidebar-toggle-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            padding: 1.5rem;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .sidebar.expanded .sidebar-toggle-btn {
+            justify-content: flex-end;
+            padding-right: 1.5rem;
+        }
+        .sidebar-toggle-btn:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--act-gold);
+        }
+        .sidebar-brand-block {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            height: 0;
+            transition: opacity 0.2s ease;
+        }
+        .sidebar.expanded .sidebar-brand-block {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            height: auto;
+        }
+        .school-logo {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+            margin-bottom: 0.75rem;
+        }
+        .school-name {
+            font-family: 'Great Vibes', cursive;
+            font-size: 1.09rem;
+            font-weight: 700;
+            color: var(--act-gold);
+            line-height: 1.2;
+        }
+        .former-name {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+            margin-top: 0.2rem;
+        }
+        .school-motto {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 0.75rem;
+            color: white;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            margin-top: 0.4rem;
+            font-style: italic;
+        }
+        .dept-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+            text-transform: uppercase;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
+            margin-top: 0.75rem;
+            width: 100%;
+        }
+        .sidebar-menu {
+            flex: 1;
+            padding: 1.5rem 0;
+            list-style: none;
+        }
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.9rem 1.5rem;
+            color: rgba(255, 255, 255, 0.75);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .sidebar-menu a i {
+            font-size: 1.2rem;
+            width: 40px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .sidebar-menu span {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease;
+        }
+        .sidebar.expanded .sidebar-menu span {
+            opacity: 1;
+            visibility: visible;
+        }
+        .sidebar-menu li.active a,
+        .sidebar-menu a:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.06);
+        }
+        .sidebar-menu li.active a {
+            color: var(--act-gold);
+            font-weight: 600;
+            box-shadow: inset 4px 0 0 var(--act-gold);
+        }
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .logout-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            justify-content: center;
+        }
+        .sidebar:not(.expanded) .logout-btn span {
+            display: none;
+        }
+        .logout-btn:hover {
+            background-color: #e11d48;
+            border-color: #e11d48;
+            color: white;
+        }
+        /* --- MAIN DASHBOARD BODY AREA --- */
+        .main-content {
+            margin-left: var(--sidebar-collapsed-width);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding-top: 0;
+            position: relative;
+            z-index: 1;
+        }
+        body:has(.sidebar.expanded) .main-content {
+            margin-left: var(--sidebar-expanded-width);
+        }
+        .welcome-header {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            width: 100%;
+            display: block;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            font-style: italic;
+        }
+        .profile-card {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 2.5rem;
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .profile-card.collapsed {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-collapsed-width);
+            right: 0;
+            border-radius: 0;
+            padding: 0.75rem 2rem;
+            margin-bottom: 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-left: none;
+            border-right: none;
+            border-top: none;
+            gap: 1.75rem;
+            z-index: 10;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s ease;
+        }
+        
+        /* Updated rule to properly override 'left' when the sidebar has the 'expanded' class */
+        body:has(.sidebar.expanded) .profile-card.collapsed {
+            left: var(--sidebar-expanded-width) !important;
+        }
+        .profile-pic-frame {
+            width: 140px;
+            height: 140px;
+            border-radius: 8px;
+            border: 3px solid var(--act-blue);
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .profile-pic-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .profile-pic-frame img:hover {
+            transform: scale(1.05);
+        }
+        .profile-card.collapsed .profile-pic-frame {
+            width: 100px;
+            height: 100px;
+            border-width: 3px;
+        }
+        .profile-summary {
+            flex: 1;
+            transition: all 0.3s ease;
+        }
+        .profile-card.collapsed .profile-summary {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding-top: 0.1rem;
+        }
+        .profile-summary h1 {
+            font-size: 1.5rem;
+            color: var(--act-blue);
+            margin-bottom: 0.4rem;
+            font-weight: 700;
+            transition: all 0.4s ease;
+        }
+        .profile-card.collapsed .profile-summary h1 {
+            font-size: 2rem;
+            margin-bottom: 0;
+        }
+        .profile-card.collapsed .profile-summary p:has(#student_email) {
+            display: none;
+        }
+        .status-tags {
+            margin-top: 0.75rem;
+            display: flex;
+            gap: 0.5rem;
+            transition: all 0.4s ease;
+        }
+        .profile-card.collapsed .status-tags {
+            margin-top: 0;
+        }
+        .container {
+            flex: 1;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            padding-top: 2rem;
+        }
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.35rem 0.85rem;
+            border-radius: 50px;
+            text-transform: uppercase;
+        }
+        .badge-blue { background-color: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+        .badge-green { background-color: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+        
+        .pdf-btn {
+            background-color: var(--act-blue);
+            color: white;
+            border: 2px solid var(--act-gold);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 2rem;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .pdf-btn:hover {
+            background-color: #003366;
+        }
+        .semester-title {
+            background-color: var(--act-blue);
+            color: white;
+            padding: 10px 15px;
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0;
+            font-weight: 700;
+            border-radius: 4px 4px 0 0;
+        }
+        .records-table {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            width: 100%;
+            margin-bottom: 2rem;
+            border-collapse: collapse;
+            border-radius: 0 0 10px 10px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+        .records-table th {
+            background: #f1f5f9;
+            color: var(--text-dark);
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 2px solid #cbd5e1;
+        }
+        .records-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+            color: var(--text-dark);
+        }
+        .records-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        footer {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-top: 1px solid #e2e8f0;
+            padding: 0.5rem 1.25rem;
+            text-align: center; 
+            font-size: 0.85rem; 
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+        footer div {
+            margin-bottom: 0.25rem;
+        }
+        footer div:last-child {
+            margin-bottom: 0;
+        }
+        .motto-cursive {
+            font-family: 'Great Vibes', cursive;
+            font-size: 1.2rem;
+            margin-top: 0.4rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { 
+                width: 280px !important; 
+                position: fixed !important; 
+                left: -280px; 
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+            .sidebar.active {
+                left: 0 !important;
+            }
+            .main-content { 
+                margin-left: 0 !important; 
+                width: 100% !important;
+                padding: 10px !important;
+                padding-top: 20px !important;
+            }
+            .profile-card.collapsed {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 998;
+                flex-direction: column !important;
+                text-align: center !important;
+                padding: 1rem !important;
+                background-color: rgba(255, 255, 255, 0.98) !important;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+            }
+            .profile-card.collapsed ~ .main-content { 
+                padding-top: 220px !important; 
+            }
+            .profile-card.collapsed .profile-pic-frame {
+                margin: 0 auto !important;
+            }
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+            }
+            .sidebar-overlay.active {
+                display: block;
+            }
+            .mobile-menu-trigger {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                position: fixed;
+                top: 25px;
+                left: 0; 
+                width: 48px;
+                height: 42px;
+                background-color: #0b284c; 
+                color: #ffffff;
+                border: none;
+                border-radius: 0 8px 8px 0; 
+                font-size: 1.2rem;
+                cursor: pointer;
+                z-index: 997;
+                box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.25);
+                padding-right: 6px; 
+            }
+            .trigger-gold-line {
+                position: absolute;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                width: 4px;
+                background-color: #e2a812; 
+            }
+        }
+        @media (min-width: 769px) {
+            .mobile-menu-trigger {
+                display: none !important;
+            }
+        }
+        .image-lightbox {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+        }
+        .image-lightbox img {
+            max-width: 85%;
+            max-height: 85%;
+            border-radius: 12px;
+            border: 4px solid var(--act-gold);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            transform: scale(0.7);
+            transition: transform 0.3s ease;
+        }
+        .image-lightbox.active img {
+            transform: scale(1);
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <button class="mobile-menu-trigger" onclick="toggleMobileSidebar()">
+        <i class="fa-solid fa-bars"></i>
+        <div class="trigger-gold-line"></div>
+    </button>
+
+    <!-- LEFT SIDEBAR NAVIGATION PANEL (COLLAPSIBLE) -->
+    <nav class="sidebar" id="dashboardSidebar">
+        <button class="sidebar-toggle-btn" onclick="toggleSidebar(); toggleMobileSidebar();">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <!-- School Detailed Branding -->
+        <div class="sidebar-brand-block">
+            <img class="school-logo" src="https://lh3.googleusercontent.com/d/1s1s802Y7n5PgAX4dLZ6cZzRhYhN_ofTA" alt="School Logo">
+            <div class="school-name">Adventist College of Technology, Inc.</div>
+            <div class="former-name">(Formerly: Matutum View Christian College)</div>
+            <div class="school-motto">"An Institution of Faith and Skills Development"</div>
+            <div class="dept-title">BSED Mathematics Department</div>
+        </div>
+        
+        <!-- Menu Items -->
+        <ul class="sidebar-menu">
+            <li>
+                <a href="/profile.html">
+                    <i class="fa-solid fa-user"></i>
+                    <span>Student Profile</span>
+                </a>
+            </li>
+            <li class="active">
+                <a href="javascript:void(0)" class="nav-link">
+                    <i class="fa-solid fa-graduation-cap"></i> 
+                    <span>Academic Records</span>
+                </a>
+            </li>
+        </ul>
+        <!-- Bottom Logout Option -->
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Log Out</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- RIGHT CONTENT AREA -->
+    <main class="main-content">
+        <div id="scroll-anchor" style="position: absolute; top: 0; height: 1px; width: 1px;"></div>
+        <div class="container">
+            <h1 class="welcome-header">Academic Records</h1>
+            
+            <!-- Profile Card Header with Collapsed Mechanic -->
+            <div class="profile-card">
+                <div class="profile-pic-frame">
+                    <img id="student_photo" src="https://placehold.co/150?text=Loading..." alt="Student Picture" onclick="openImageMagnifier()">
+                </div>
+                <div class="profile-summary">
+                    <h1 id="student_name" style="font-size: 1.6rem;">Loading Name...</h1>
+                    <p>Student ID: <strong id="student_id">Loading...</strong></p>
+                    <p>Email: <span id="student_email">Loading...</span></p>
+                    <div class="status-tags">
+                        <span class="badge badge-blue" id="student_year">Loading Year</span>
+                        <span class="badge badge-green" id="student_status">Active</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Download Button -->
+            <button onclick="downloadPDFForm()" class="pdf-btn"><i class="fa-solid fa-file-pdf"></i> Download Form</button>
+
+            <!-- Records Container -->
+            <div id="recordsContainer"></div>
+        </div>
+
+        <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+        
+        <!-- System Footer -->
+        <footer>
+            <div>&copy; 2026 Adventist College of Technology, Inc. | BSED Mathematics Department</div>
+            <div>All Rights Reserved.</div>
+            <div class="motto-cursive">To God be the Glory!</div>
+        </footer>
+    </main>
+
+    <!-- JavaScript to Handle Layout, Collapsing Header, and Data Fetching -->
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        let studentId = params.get('id');
+        
+        if (!studentId || studentId === 'Loading...' || studentId.trim() === '') {
+            studentId = sessionStorage.getItem('student_id');
+        } else {
+            sessionStorage.setItem('student_id', studentId);
+        }
+
+        if (!studentId || studentId === 'Loading...') {
+            alert("Please log in to view your academic records.");
+            window.location.href = "/";
+        }
+
+        let globalCurriculumData = []; 
+        let globalProfileData = {};
+
+        async function loadAcademicRecords() {
+            if (!studentId) return;
+
+            try {
+                // 1. Fetch Profile Data from Supabase endpoint
+                const profileResponse = await fetch(`/api/profile/${encodeURIComponent(studentId)}`);
+                const profileData = await profileResponse.json();
+                
+                if (profileData.success) {
+                    globalProfileData = profileData.profile;
+                    const student = globalProfileData;
+                    document.getElementById('student_name').innerText = student.name;
+                    document.getElementById('student_id').innerText = student.student_id;
+                    document.getElementById('student_email').innerText = student.email;
+                    document.getElementById('student_year').innerText = student.year_level;
+                    document.getElementById('student_status').innerText = student.academic_status;
+                    document.getElementById('student_photo').src = student.photo_url || 'https://placehold.co/150?text=No+Photo';
+                }
+
+                // 2. Fetch Grades Data
+                const gradesResponse = await fetch(`/api/get-curriculum-with-grades/${encodeURIComponent(studentId)}`);
+                const result = await gradesResponse.json();
+
+                if (result.success) {
+                    globalCurriculumData = result.data;
+                    renderRecordsTable(globalCurriculumData);
+                }
+            } catch (err) {
+                console.error("Error loading records:", err);
+            }
+        }
+
+        function renderRecordsTable(data) {
+            const container = document.getElementById('recordsContainer');
+            container.innerHTML = ''; 
+
+            const grouped = data.reduce((acc, curr) => {
+                const year = curr.year_level || 'Unknown';
+                const sem = curr.semester || 'Unknown';
+                if (!acc[year]) acc[year] = {};
+                if (!acc[year][sem]) acc[year][sem] = [];
+                acc[year][sem].push(curr);
+                return acc;
+            }, {});
+
+            for (const [year, sems] of Object.entries(grouped)) {
+                for (const [sem, records] of Object.entries(sems)) {
+                    container.innerHTML += `<div class="semester-title">${year} - ${sem}</div>`;
+                    let table = `<table class="records-table"><tr><th>Code</th><th>Descriptive Title</th><th>Units</th><th>Grade</th></tr>`;
+                    records.forEach(r => {
+                        table += `<tr><td>${r.course_code}</td><td>${r.descriptive_title}</td><td>${r.units}</td><td>${r.grade || 'N/A'}</td></tr>`;
+                    });
+                    table += `</table>`;
+                    container.innerHTML += table;
+                }
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('dashboardSidebar');
+            sidebar.classList.toggle('expanded');
+        }
+
+        function initHeaderScrollWatcher() {
+            const profileCard = document.querySelector('.profile-card');
+            const welcomeHeader = document.querySelector('.welcome-header');
+            
+            if (!profileCard) return;
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 60) {
+                    profileCard.classList.add('collapsed');
+                    if (welcomeHeader) {
+                        welcomeHeader.style.opacity = '0';
+                        welcomeHeader.style.visibility = 'hidden';
+                    }
+                } else {
+                    profileCard.classList.remove('collapsed');
+                    if (welcomeHeader) {
+                        welcomeHeader.style.opacity = '1';
+                        welcomeHeader.style.visibility = 'visible';
+                    }
+                }
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initHeaderScrollWatcher();
+            loadAcademicRecords();
+        });
+
+        function logout() {
+            if(confirm("Are you sure you want to securely log out of your student portal session?")) {
+                sessionStorage.removeItem('student_id');
+                window.location.href = "/";
+            }
+        }
+
+        function openImageMagnifier() {
+            const currentPhotoSrc = document.getElementById('student_photo').src;
+            if (currentPhotoSrc.includes('placehold.co')) return; 
+            const modal = document.getElementById('imageModal');
+            const magnifiedImg = document.getElementById('magnifiedImage');
+            
+            magnifiedImg.src = currentPhotoSrc;
+            modal.style.display = 'flex';
+            
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+        }
+
+        function closeImageMagnifier() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        // Custom Strict 2-Page PDF Form Generator mapping date_of_birth from Supabase & larger student name
+        async function downloadPDFForm() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4'); // A4 dimensions: 210 x 297 mm
+            
+            const sName = document.getElementById('student_name').innerText;
+            const sId = document.getElementById('student_id').innerText;
+            const sYear = document.getElementById('student_year').innerText;
+            const sStatus = document.getElementById('student_status').innerText;
+            const sPhotoSrc = document.getElementById('student_photo').src;
+            
+            // Mapped correctly to use date_of_birth from Supabase table response data
+            let sBirthdate = globalProfileData.date_of_birth || globalProfileData.birthdate || 'N/A';
+if (sBirthdate !== 'N/A') {
+    const parsedDate = new Date(sBirthdate);
+    if (!isNaN(parsedDate)) {
+        sBirthdate = parsedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    }
+}
+            const sAddress = globalProfileData.address || globalProfileData.present_address || 'PRK.6, BRGY. ACMONAN, TUPI, SOUTH COTABATO';
+
+            const logoUrl = 'https://lh3.googleusercontent.com/d/1s1s802Y7n5PgAX4dLZ6cZzRhYhN_ofTA';
+            const logoImg = new Image();
+            logoImg.crossOrigin = 'Anonymous';
+            logoImg.src = logoUrl;
+            await new Promise((resolve) => {
+                logoImg.onload = resolve;
+                logoImg.onerror = resolve;
+            });
+
+            const profileImg = new Image();
+            profileImg.crossOrigin = 'Anonymous';
+            profileImg.src = sPhotoSrc;
+            await new Promise((resolve) => {
+                profileImg.onload = resolve;
+                profileImg.onerror = resolve;
+            });
+
+            // Page 1 Header Layout
+            function drawPage1Header() {
+                if (logoImg.complete && logoImg.naturalWidth !== 0) {
+                    doc.setGState(new doc.GState({ opacity: 0.20 }));
+                    doc.addImage(logoImg, 'PNG', 55, 85, 100, 100);
+                    doc.setGState(new doc.GState({ opacity: 1.0 }));
+                }
+
+                doc.setFont("Times", "bold");
+                doc.setFontSize(10.5);
+                doc.setTextColor(0, 34, 68);
+                doc.text("ADVENTIST COLLEGE OF TECHNOLOGY, INC.", 105, 12, { align: "center" });
+                
+                doc.setFont("Times", "italic");
+                doc.setFontSize(8);
+                doc.setTextColor(80, 80, 80);
+                doc.text("(Formerly: Matutum View Christian College)", 105, 16, { align: "center" });
+                doc.text('"An Institution of Faith and Skills Development"', 105, 20, { align: "center" });
+
+                doc.setFont("Times", "italic");
+                doc.setFontSize(8.5);
+                doc.setTextColor(0, 34, 68);
+                doc.text("BSED MATHEMATICS DEPARTMENT", 105, 24.5, { align: "center" });
+
+                doc.setDrawColor(0, 34, 68);
+                doc.setLineWidth(0.6);
+                doc.line(15, 27, 195, 27);
+
+                doc.setFont("Helvetica", "bold");
+                doc.setFontSize(11);
+                doc.setTextColor(0, 34, 68);
+                doc.text("BSED MATHEMATICS EVALUATION FORM", 105, 33, { align: "center" });
+            }
+
+            // Page 2 Header Layout
+            function drawPage2Header() {
+                if (logoImg.complete && logoImg.naturalWidth !== 0) {
+                    doc.setGState(new doc.GState({ opacity: 0.20 }));
+                    doc.addImage(logoImg, 'PNG', 55, 85, 100, 100);
+                    doc.setGState(new doc.GState({ opacity: 1.0 }));
+                }
+
+                doc.setFont("Helvetica", "bold");
+                doc.setFontSize(8.5);
+                doc.setTextColor(0, 0, 0);
+                doc.text(`Name:   ${sName}`, 15, 12);
+                doc.text(`Page: 2 of 2`, 195, 12, { align: "right" });
+
+                doc.setDrawColor(0, 0, 0);
+                doc.setLineWidth(0.5);
+                doc.line(15, 15, 195, 15);
+            }
+
+            // Student Profile Section Box with larger Student Name font
+            function drawProfileSection(startY) {
+                doc.setFillColor(255, 255, 255);
+                doc.setDrawColor(200, 200, 200);
+                doc.roundedRect(15, startY, 180, 26, 2, 2, 'FD');
+
+                if (profileImg.complete && profileImg.naturalWidth !== 0 && !sPhotoSrc.includes('placehold.co')) {
+                    try {
+                        doc.addImage(profileImg, 'JPEG', 18, startY + 2.5, 21, 21);
+                    } catch(e) {
+                        doc.setFillColor(230, 230, 230);
+                        doc.rect(18, startY + 2.5, 21, 21, 'F');
+                    }
+                } else {
+                    doc.setFillColor(230, 230, 230);
+                    doc.rect(18, startY + 2.5, 21, 21, 'F');
+                }
+                doc.setDrawColor(0, 34, 68);
+                doc.rect(18, startY + 2.5, 21, 21);
+
+                // Increased font size for student name
+                doc.setFont("Helvetica", "bold");
+                doc.setFontSize(13.5);
+                doc.setTextColor(0, 34, 68);
+                doc.text(sName, 43, startY + 8);
+
+                doc.setFont("Helvetica", "normal");
+                doc.setFontSize(9);
+                doc.setTextColor(30, 41, 59);
+                doc.text(`Student ID: ${sId}`, 43, startY + 14);
+                doc.text(`Birthdate: ${sBirthdate}`, 43, startY + 19);
+                doc.text(`Address: ${sAddress}`, 43, startY + 24);
+
+                // Stacked & Larger Year Level Badge (Top)
+                doc.setFillColor(239, 246, 255);
+                doc.setDrawColor(191, 219, 254);
+                doc.roundedRect(150, startY + 4, 38, 7.5, 1.5, 1.5, 'FD');
+                doc.setFont("Helvetica", "bold");
+                doc.setFontSize(9);
+                doc.setTextColor(30, 64, 175);
+                doc.text(sYear, 169, startY + 9, { align: 'center' });
+
+                // Stacked & Larger Academic Status Badge (Bottom)
+                doc.setFillColor(240, 253, 244);
+                doc.setDrawColor(187, 247, 208);
+                doc.roundedRect(150, startY + 14, 38, 7.5, 1.5, 1.5, 'FD');
+                doc.setFont("Helvetica", "bold");
+                doc.setFontSize(9);
+                doc.setTextColor(22, 101, 52);
+                doc.text(sStatus, 169, startY + 19, { align: 'center' });
+            }
+
+            // Group curriculum records
+            const grouped = globalCurriculumData.reduce((acc, curr) => {
+                const year = curr.year_level || '1st Year';
+                const sem = curr.semester || '1st Semester';
+                if (!acc[year]) acc[year] = {};
+                if (!acc[year][sem]) acc[year][sem] = [];
+                acc[year][sem].push(curr);
+                return acc;
+            }, {});
+
+            function renderTranscriptTable(startX, startY, width, items, semesterTitleStr) {
+                let currentY = startY;
+                const baseRowHeight = 5.5;
+
+                doc.setFont("Helvetica", "bold");
+                doc.setFontSize(8.5);
+
+                doc.setFillColor(0, 34, 68);
+                doc.setTextColor(255, 255, 255);
+                doc.rect(startX, currentY, width, 5.5, 'FD');
+                doc.text(semesterTitleStr, startX + 3, currentY + 3.8);
+                currentY += 5.5;
+
+                doc.setFillColor(241, 245, 249);
+                doc.setTextColor(30, 41, 59);
+                doc.rect(startX, currentY, width, 5.5, 'FD');
+                doc.text("Code", startX + 3, currentY + 3.8);
+                doc.text("Descriptive Title", startX + 42, currentY + 3.8);
+                doc.text("Units", startX + 152, currentY + 3.8, { align: 'center' });
+                doc.text("Grade", startX + 172, currentY + 3.8, { align: 'center' });
+                currentY += 5.5;
+
+                doc.setFont("Helvetica", "normal");
+                doc.setFontSize(8);
+
+                items.forEach((item) => {
+                    let title = String(item.descriptive_title || '');
+                    let splitTitle = doc.splitTextToSize(title, 105);
+                    let rowH = splitTitle.length > 1 ? 8 : baseRowHeight;
+
+                    doc.setDrawColor(226, 232, 240);
+                    doc.rect(startX, currentY, width, rowH);
+
+                    doc.text(String(item.course_code || ''), startX + 3, currentY + 3.8);
+                    
+                    if (splitTitle.length > 1) {
+                        doc.text(splitTitle[0], startX + 42, currentY + 3.2);
+                        doc.text(splitTitle[1], startX + 42, currentY + 6.5);
+                    } else {
+                        doc.text(title, startX + 42, currentY + 3.8);
+                    }
+
+                    doc.text(String(item.units || '3'), startX + 152, currentY + 3.8, { align: 'center' });
+                    doc.text(String(item.grade || 'N/A'), startX + 172, currentY + 3.8, { align: 'center' });
+
+                    currentY += rowH;
+                });
+
+                return currentY + 3;
+            }
+
+            const y1_1st = grouped['1st Year'] && grouped['1st Year']['1st Semester'] ? grouped['1st Year']['1st Semester'] : [];
+            const y1_2nd = grouped['1st Year'] && grouped['1st Year']['2nd Semester'] ? grouped['1st Year']['2nd Semester'] : [];
+            const y2_1st = grouped['2nd Year'] && grouped['2nd Year']['1st Semester'] ? grouped['2nd Year']['1st Semester'] : [];
+            const y2_2nd = grouped['2nd Year'] && grouped['2nd Year']['2nd Semester'] ? grouped['2nd Year']['2nd Semester'] : [];
+            const y3_1st = grouped['3rd Year'] && grouped['3rd Year']['1st Semester'] ? grouped['3rd Year']['1st Semester'] : [];
+            const y3_2nd = grouped['3rd Year'] && grouped['3rd Year']['2nd Semester'] ? grouped['3rd Year']['2nd Semester'] : [];
+            const y4_1st = grouped['4th Year'] && grouped['4th Year']['1st Semester'] ? grouped['4th Year']['1st Semester'] : [];
+            const y4_2nd = grouped['4th Year'] && grouped['4th Year']['2nd Semester'] ? grouped['4th Year']['2nd Semester'] : [];
+
+            // ================= PAGE 1 =================
+            drawPage1Header();
+            drawProfileSection(36);
+
+            let p1_y = 65;
+            if (y1_1st.length > 0) p1_y = renderTranscriptTable(15, p1_y, 180, y1_1st, "1st Year - 1st Semester");
+            if (y1_2nd.length > 0) p1_y = renderTranscriptTable(15, p1_y, 180, y1_2nd, "1st Year - 2nd Semester");
+            if (y2_1st.length > 0 && p1_y < 250) {
+                renderTranscriptTable(15, p1_y, 180, y2_1st, "2nd Year - 1st Semester");
+            }
+
+            // ================= PAGE 2 =================
+            doc.addPage();
+            drawPage2Header();
+
+            let p2_y = 18;
+            let startYear2Sem1 = (p1_y >= 250) ? y2_1st : [];
+            if (startYear2Sem1.length > 0) {
+                p2_y = renderTranscriptTable(15, p2_y, 180, startYear2Sem1, "2nd Year - 1st Semester");
+            }
+            if (y2_2nd.length > 0) {
+                p2_y = renderTranscriptTable(15, p2_y, 180, y2_2nd, "2nd Year - 2nd Semester");
+            }
+            if (y3_1st.length > 0) {
+                p2_y = renderTranscriptTable(15, p2_y, 180, y3_1st, "3rd Year - 1st Semester");
+            }
+            if (y3_2nd.length > 0) {
+                p2_y = renderTranscriptTable(15, p2_y, 180, y3_2nd, "3rd Year - 2nd Semester");
+            }
+            if (y4_1st.length > 0) {
+                p2_y = renderTranscriptTable(15, p2_y, 180, y4_1st, "4th Year - 1st Semester");
+            }
+            if (y4_2nd.length > 0) {
+                p2_y = renderTranscriptTable(15, p2_y, 180, y4_2nd, "4th Year - 2nd Semester");
+            }
+
+            p2_y += 4;
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(7.5);
+            doc.setTextColor(0, 34, 68);
+            
+            const disclaimerText = "THIS DOCUMENT IS INTENDED SOLELY FOR EVALUATION PURPOSES WITHIN ADVENTIST COLLEGE OF TECHNOLOGY, INC. IT IS NOT AN OFFICIAL INSTITUTIONAL DOCUMENT AND SHALL NOT BE USED, REPRODUCED, OR RELIED UPON FOR ANY PURPOSE OUTSIDE ITS INTENDED USE OR OUTSIDE ADVENTIST COLLEGE OF TECHNOLOGY, INC.";
+            const splitDisclaimer = doc.splitTextToSize(disclaimerText, 170);
+            doc.text(splitDisclaimer, 105, p2_y, { align: "center" });
+
+            p2_y += 14;
+            doc.setFont("Courier", "bold");
+            doc.setFontSize(7);
+            doc.setTextColor(0, 0, 0);
+            doc.text("LEGEND FOR GRADING SYSTEM", 15, p2_y);
+            p2_y += 4;
+            
+            doc.setDrawColor(0, 0, 0);
+            doc.rect(15, p2_y, 180, 12);
+            doc.text("Letter Grades     A      A-      B+      B      B-      C+      C      C-      D      F", 18, p2_y + 4);
+            doc.text("Percentage      100-98  97-95   94-92   91-89   88-86   85-83   82-80   79-77   76-75  FAILING", 18, p2_y + 8);
+            doc.text("Honor Points     4.0     3.7     3.3     3.0     2.7     2.3     2.0     1.5     1.0     0", 18, p2_y + 11);
+
+            doc.save(`BSED_Math_Evaluation_Form_${sId}.pdf`);
+        }
+    </script>
+
+    <!-- Image Magnifier Modal Overlay -->
+    <div id="imageModal" class="image-lightbox" onclick="closeImageMagnifier()">
+        <span class="lightbox-close">&times;</span>
+        <img id="magnifiedImage" src="" alt="Enlarged Student Photo">
+    </div>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BSED Mathematics - Admin Dashboard</title>
+    <!-- Links to your main stylesheet to grab your profile page layout variables -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* This ensures the page layout adapts exactly like your profile view */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+            background: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* The Left Sidebar Navigation Panel matching profile.html */
+        .sidebar {
+            width: 60px;
+            background-color: #001f3d;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 2rem;
+            gap: 2rem;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        .sidebar-icon {
+            color: #ffcc00;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            text-decoration: none;
+        }
+
+        .sidebar-icon:hover, .sidebar-icon.active {
+            opacity: 1;
+        }
+
+        /* Right Window Container wrapper */
+        .main-wrapper {
+            margin-left: 0;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            /* This mimics your background setup: point to your campus backdrop asset */
+            background: linear-gradient(rgba(0, 31, 61, 0.75), rgba(0, 31, 61, 0.75)), 
+                        url('https://lh3.googleusercontent.com/d/1mE3LrHYGmFZ0jgP9k4giyPypXAKnMjLl') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+        }
+
+        /* Top Welcome Banner Header */
+        .hero-banner {
+            text-align: center;
+            padding: 3rem 1rem 2rem 1rem;
+            color: white;
+        }
+
+        .hero-banner h1 {
+            font-family: 'Georgia', serif;
+            font-style: italic;
+            font-size: 2.5rem;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        /* Center Content Container */
+        .directory-container {
+            max-width: 850px;
+            width: 100%;
+            margin: 0 auto 4rem auto;
+            padding: 0 1.5rem;
+            box-sizing: border-box;
+        }
+
+        /* Search input bar styling matching clear inputs */
+        .search-wrapper {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-wrapper input {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 1.05rem;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper" style="min-height: 100vh; display: flex; flex-direction: column;">
+        
+    <!-- Main Search and Header Wrapper (Now fully vertically centered on screen) -->
+    <div id="searchContainer" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); width: 100%; max-width: 750px; margin: 0 auto; padding: 2rem 0;">
+        
+        <!-- Welcome Header Block (Bigger typography) -->
+        <div id="welcomeBlock" style="text-align: center; margin-bottom: 2.5rem; transition: opacity 0.4s ease, transform 0.4s ease;">
+            <h1 style="color: white; font-family:fantasy; font-style: italic; font-size: 3.8rem; margin-bottom: 0.75rem; font-weight: 900; letter-spacing: -0.5px; text-shadow: 0 4px 12px rgba(0,0,0,0.3);">Welcome, Administrator!</h1>
+            <p style="color: rgba(255,255,255,0.85); font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 600;">BSED Mathematics Management Portal</p>
+        </div>
+
+        <!-- The Search Input Container -->
+        <div style="width: 100%; position: relative; max-width: 650px;">
+            <input type="text" id="searchBox" placeholder="🔍 Search student accounts by official name or ID index..." style="width: 100%; padding: 1.4rem 1.8rem; border-radius: 40px; border: none; font-size: 1.2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.25); outline: none; transition: all 0.3s ease;">
+        </div>
+    </div>
+
+    <!-- Dynamic Content Workspace Grid -->
+    <main class="directory-container" style="flex-grow: 1;">
+        
+        <!-- Hook Location target for admin-script.js loops -->
+        <div id="studentGrid" style="width: 100%; max-width: 700px; margin: 0 auto; padding-bottom: 4rem;">
+            <!-- Data injection point -->
+        </div>
+
+    </main>
+</div>
+
+    <!-- 3. FUNCTION LINK TAGS -->
+    <script src="admin-script.js"></script>
+    <script>
+        // Simple hookup for the logout navigation item button
+        const logBtn = document.getElementById('logoutBtn');
+        if(logBtn) {
+            logBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                sessionStorage.clear();
+                window.location.href = 'index.html';
+            });
+        }
+    </script>
+</body>
+</html>
