@@ -164,6 +164,7 @@ body {
     color: #ffffff;
     position: relative;
     padding: 5px 0;
+     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* FOOTER & MISSION/VISION PILLARS */
@@ -212,7 +213,7 @@ footer {
 }
 
 .glory-text {
-    font-family:Verdana, Geneva, Tahoma, sans-serif
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
     font-style: italic;
     color: #FFC107;
     font-size: 1.5rem;
