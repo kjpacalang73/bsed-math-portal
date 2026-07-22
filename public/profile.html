@@ -478,8 +478,9 @@ footer div:last-child {
         left: -280px; /* Hidden off the left edge */
         z-index: 1000;
         transition: left 0.3s ease;
+        
     }
-    
+   
     /* When a special class 'active' is added, slide the sidebar into view */
     .sidebar.active {
         left: 0 !important;
@@ -511,10 +512,19 @@ footer div:last-child {
     
     .profile-card.collapsed ~ .main-content { 
         padding-top: 220px !important; 
+       
     }
 
     .profile-card.collapsed .profile-pic-frame {
         margin: 0 auto !important;
+    }
+
+    .profile-summary h1 {
+    font-size: 1rem;
+    color: red;
+    margin-bottom: 0.4rem;
+    font-weight: 700;
+    transition: all 0.4s ease;
     }
 
     /* Create a dark background overlay when the mobile sidebar opens */

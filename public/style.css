@@ -42,7 +42,8 @@ body {
 }
 
 .school-titles h1 {
-    font-family: 'Cinzel', serif;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-style:italic;
     font-size: 1.8rem;
     font-weight: 700;
     color: white;
@@ -106,6 +107,7 @@ body {
     margin-bottom: 20px;
 }
 
+
 .input-group label {
     display: block;
     font-size: 0.85rem;
@@ -155,6 +157,15 @@ body {
     color: #666;
 }
 
+.contact-details {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 1rem;
+    color: #ffffff;
+    position: relative;
+    padding: 5px 0;
+}
+
 /* FOOTER & MISSION/VISION PILLARS */
 footer {
     background-image: linear-gradient(rgba(1, 22, 56, 0.9), rgba(1, 22, 56, 0.9)), url('https://lh3.googleusercontent.com/d/1g9ZQn60WdVOU6TyallLidFy7iKqsX0bu');
@@ -201,9 +212,10 @@ footer {
 }
 
 .glory-text {
+    font-family:Verdana, Geneva, Tahoma, sans-serif
     font-style: italic;
     color: #FFC107;
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     font-weight: 500;
 }
 
