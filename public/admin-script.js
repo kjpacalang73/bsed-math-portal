@@ -91,7 +91,7 @@ function displayStudentDirectory(students) {
 // Fetch active database data directly from your backend route
 async function loadLiveStudents() {
     try {
-        const response = await fetch('http://localhost:3000/api/admin/students');
+        const response = await fetch('api/admin/students');
         const result = await response.json();
 
         console.log("Students loaded from database:", result);
