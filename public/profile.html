@@ -492,6 +492,43 @@ footer div:last-child {
         width: 100% !important;
         padding: 10px !important;
         padding-top: 20px !important; /* Adjust this value if needed to clear your mobile header height */
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    /* 1. Stack the card elements vertically and center them */
+    .profile-card {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        gap: 1rem !important;
+    }
+
+    /* 2. Force the profile picture container to appear first and center it */
+    .profile-card .profile-pic-frame {
+        order: 1 !important;
+        margin: 0 auto !important;
+    }
+
+    /* 3. Force the text details and status tags to sit below the photo */
+    .profile-card .profile-summary {
+        order: 2 !important;
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+
+    /* 4. Stack the status tags nicely at the very bottom */
+    .profile-card .status-tags {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        width: 100% !important;
+        margin-top: 0.5rem !important;
     }
 
     /* Make the top profile bar layout fit beautifully on small screens */
@@ -511,20 +548,31 @@ footer div:last-child {
     }
     
     .profile-card.collapsed ~ .main-content { 
-        padding-top: 220px !important; 
+        padding-top: 260px !important; 
        
     }
 
     .profile-card.collapsed .profile-pic-frame {
-        margin: 0 auto !important;
+        margin: 0 auto 10 px auto !important;
     }
 
     .profile-summary h1 {
-    font-size: 1rem;
-    color: red;
+    font-size: 1.5rem;
     margin-bottom: 0.4rem;
     font-weight: 700;
     transition: all 0.4s ease;
+    }
+
+    .status-tags {
+        justify-content: center !important;
+        margin-top: 0.5rem !important;
+        display: flex !important;
+        flex-direction:column !important;
+        align-items: flex-start;
+        gap: 8px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     /* Create a dark background overlay when the mobile sidebar opens */
