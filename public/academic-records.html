@@ -689,7 +689,7 @@
                     container.innerHTML += `<div class="semester-title">${year} - ${sem}</div>`;
                     let table = `<table class="records-table"><tr><th>Code</th><th>Descriptive Title</th><th>Units</th><th>Grade</th></tr>`;
                     records.forEach(r => {
-                        table += `<tr><td>${r.course_code}</td><td>${r.descriptive_title}</td><td>${r.units}</td><td>${r.grade || 'N/A'}</td></tr>`;
+                        table += `<tr><td>${r.course_code}</td><td>${r.descriptive_title}</td><td>${r.units}</td><td>${r.grade || 'TBA'}</td></tr>`;
                     });
                     table += `</table>`;
                     container.innerHTML += table;
