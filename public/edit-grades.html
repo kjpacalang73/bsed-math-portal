@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Edit Grades</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; min-height: 100vh; background: url('https://lh3.googleusercontent.com/d/1mE3LrHYGmFZ0jgP9k4giyPypXAKnMjLl') no-repeat center center fixed; background-size: cover; font-family: sans-serif; }
         body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: -1; }
@@ -25,7 +26,7 @@
 
     <!-- Header Box -->
     <div class="student-header">
-        <img id="studentPhoto" src="https://via.placeholder.co/100" alt="Student" class="student-img">
+        <img id="studentPhoto" src="https://placehold.co/150?text=Loading..." alt="Student" class="student-img onclick="openImageMagnifier()">
         <div class="info-container">
             <h1 id="studentName">Loading Name...</h1>
             <p>Student ID: <span id="studentIdDisplay">Loading...</span></p>

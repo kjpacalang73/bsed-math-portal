@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Academic Records | BSED Mathematics Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- FontAwesome for Elegant Dashboard Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap">
@@ -15,7 +16,7 @@
         :root {
             --act-blue: #002244;
             --act-gold: #ffcc00;
-            --text-dark: #1e293b;
+            --text-dark: #1e293b;F
             --text-muted: #64748b;
             --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             
@@ -960,7 +961,7 @@ if (sBirthdate !== 'N/A') {
                     }
 
                     doc.text(String(item.units || '3'), startX + 152, currentY + 3.8, { align: 'center' });
-                    doc.text(String(item.grade || 'N/A'), startX + 172, currentY + 3.8, { align: 'center' });
+                    doc.text(String(item.grade || 'TBA'), startX + 172, currentY + 3.8, { align: 'center' });
 
                     currentY += rowH;
                 });
