@@ -402,81 +402,48 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+
 // 5. ADMIN GET ALL STUDENTS ENDPOINT (Filters out admins)
 app.get('/api/admin/students', async (req, res) => {
     try {
         const { data: students, error } = await supabase
             .from('Students')
-            .select('name, student_id, year_level, academic_status, photo_url, is_admin')
-            .eq('is_admin', false); // 🌟 FIX: Only fetch rows where is_admin is false
+            .select(`
+                name,
+                student_id,
+                year_level,
+                academic_status,
+                gender,
+                religion,
+                email,
+                photo_url,
+                is_admin
+            `)
+            .eq('is_admin', false);
 
         if (error) throw error;
 
-        console.log("fetched student sample:", students[0]);
+        console.log("========================================");
+        console.log("ADMIN STUDENT DATA");
+        console.log("Number of students:", students.length);
+        console.log("First student:", students[0]);
+        console.log("Gender:", students[0]?.gender);
+        console.log("Religion:", students[0]?.religion);
+        console.log("Email:", students[0]?.email);
+        console.log("========================================");
 
-        res.status(200).json({ success: true, students: students });
+        res.status(200).json({
+            success: true,
+            students: students
+        });
 
     } catch (error) {
         console.error('Fetch Directory Failure:', error.message);
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
 
-// Fetch both the full curriculum and the student's specific saved grades
-app.get('/api/get-curriculum-with-grades/:student_id', async (req, res) => {
-    const { student_id } = req.params;
-
-    try {
-        // 1. Fetch the full curriculum list
-        const { data: curriculum, error: currError } = await supabase
-            .from('curriculum')
-            .select('*')
-            .order('year_level', { ascending: true })
-            .order('semester', { ascending: true });
-
-        if (currError) throw currError;
-
-        // 2. Fetch the student's existing grades
-        const { data: savedGrades, error: gradesError } = await supabase
-            .from('Academic_Records')
-            .select('course_code, grade')
-            .eq('student_id', student_id);
-
-        if (gradesError) throw gradesError;
-
-        // 3. Combine them: Attach grades to curriculum items
-        const combinedData = curriculum.map(subject => {
-            const gradeEntry = savedGrades.find(g => g.course_code === subject.course_code);
-            return {
-                ...subject,
-                grade: gradeEntry ? gradeEntry.grade : '' // If no grade exists, send empty string
-            };
+        res.status(500).json({
+            success: false,
+            message: error.message
         });
-
-        res.json({ success: true, data: combinedData });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// Add this route to your server.js
-app.post('/api/save-grades', async (req, res) => {
-    console.log("DEBUG: Save request received!"); // This will show in terminal
-    console.log("DEBUG: Data payload:", req.body); // This will show what is being sent
-
-    const { records } = req.body;
-
-    try {
-        const { data, error } = await supabase
-            .from('Academic_Records')
-            .upsert(records, { onConflict: 'student_id, course_code' });
-
-        if (error) throw error;
-
-        res.json({ success: true, message: 'Grades saved successfully!' });
-    } catch (error) {
-        console.error("Save error details:", error); // This will show in terminal
-        res.status(500).json({ success: false, message: error.message });
     }
 });
 
