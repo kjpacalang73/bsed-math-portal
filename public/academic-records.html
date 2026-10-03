@@ -366,6 +366,92 @@
         .pdf-btn:hover {
             background-color: #003366;
         }
+
+        /* --- ACADEMIC RECORD PERIOD SELECTOR --- */
+        .academic-selector {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .selector-heading {
+            color: var(--act-blue);
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.8rem;
+        }
+        .year-selector,
+        .semester-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+        }
+        .semester-selector {
+            margin-top: 0.9rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        .period-btn {
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #334155;
+            padding: 0.65rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .period-btn:hover {
+            border-color: var(--act-blue);
+            color: var(--act-blue);
+            transform: translateY(-1px);
+        }
+        .period-btn.active {
+            background: var(--act-blue);
+            border-color: var(--act-blue);
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 34, 68, 0.18);
+        }
+        .semester-selector.hidden {
+            display: none;
+        }
+        .selector-label {
+            width: 100%;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: -0.15rem;
+        }
+        .records-empty {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+        .records-empty i {
+            font-size: 2rem;
+            color: #94a3b8;
+            margin-bottom: 0.75rem;
+        }
+        @media (max-width: 768px) {
+            .academic-selector {
+                padding: 1.1rem;
+            }
+            .period-btn {
+                flex: 1 1 calc(50% - 0.65rem);
+                text-align: center;
+            }
+        }
+
         .semester-title {
             background-color: var(--act-blue);
             color: white;
@@ -607,6 +693,17 @@
             <!-- Download Button -->
             <button onclick="downloadPDFForm()" class="pdf-btn"><i class="fa-solid fa-file-pdf"></i> Download Form</button>
 
+            <!-- Academic Period Selector -->
+            <div class="academic-selector" id="academicSelector" style="display: none;">
+                <div class="selector-heading">Select College Year</div>
+                <div class="year-selector" id="yearSelector"></div>
+
+                <div class="semester-selector hidden" id="semesterSelector">
+                    <div class="selector-label">Select Semester</div>
+                    <div id="semesterButtons" style="display: flex; flex-wrap: wrap; gap: 0.65rem; width: 100%;"></div>
+                </div>
+            </div>
+
             <!-- Records Container -->
             <div id="recordsContainer"></div>
         </div>
@@ -672,9 +769,63 @@
             }
         }
 
-        function renderRecordsTable(data) {
+        let selectedYear = null;
+        let selectedSemester = null;
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function getOrderedYears(grouped) {
+            const preferredOrder = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
+            return Object.keys(grouped).sort((a, b) => {
+                const ai = preferredOrder.indexOf(a);
+                const bi = preferredOrder.indexOf(b);
+                if (ai !== -1 && bi !== -1) return ai - bi;
+                if (ai !== -1) return -1;
+                if (bi !== -1) return 1;
+                return a.localeCompare(b);
+            });
+        }
+
+        function getOrderedSemesters(sems) {
+            const preferredOrder = ['1st Semester', '2nd Semester', 'Summer', 'Summer Term'];
+            return Object.keys(sems).sort((a, b) => {
+                const ai = preferredOrder.indexOf(a);
+                const bi = preferredOrder.indexOf(b);
+                if (ai !== -1 && bi !== -1) return ai - bi;
+                if (ai !== -1) return -1;
+                if (bi !== -1) return 1;
+                return a.localeCompare(b);
+            });
+        }
+
+        function renderRecordsTable(data, keepSelection = false) {
             const container = document.getElementById('recordsContainer');
-            container.innerHTML = ''; 
+            const selector = document.getElementById('academicSelector');
+            const yearSelector = document.getElementById('yearSelector');
+            const semesterSelector = document.getElementById('semesterSelector');
+            const semesterButtons = document.getElementById('semesterButtons');
+
+            container.innerHTML = '';
+            yearSelector.innerHTML = '';
+            semesterButtons.innerHTML = '';
+            semesterSelector.classList.add('hidden');
+
+            if (!data || data.length === 0) {
+                selector.style.display = 'none';
+                container.innerHTML = `
+                    <div class="records-empty">
+                        <i class="fa-solid fa-book-open"></i>
+                        <div>No academic records are available.</div>
+                    </div>`;
+                return;
+            }
 
             const grouped = data.reduce((acc, curr) => {
                 const year = curr.year_level || 'Unknown';
@@ -685,17 +836,92 @@
                 return acc;
             }, {});
 
-            for (const [year, sems] of Object.entries(grouped)) {
-                for (const [sem, records] of Object.entries(sems)) {
-                    container.innerHTML += `<div class="semester-title">${year} - ${sem}</div>`;
-                    let table = `<table class="records-table"><tr><th>Code</th><th>Descriptive Title</th><th>Units</th><th>Grade</th></tr>`;
-                    records.forEach(r => {
-                        table += `<tr><td>${r.course_code}</td><td>${r.descriptive_title}</td><td>${r.units}</td><td>${r.grade || '-'}</td></tr>`;
-                    });
-                    table += `</table>`;
-                    container.innerHTML += table;
-                }
+            const years = getOrderedYears(grouped);
+            selector.style.display = 'block';
+
+            // Keep the currently selected year when the data is refreshed.
+            // Otherwise, start with the student's current year when available,
+            // or simply use the first year in the records.
+            if (!keepSelection || !selectedYear || !grouped[selectedYear]) {
+                const profileYear = globalProfileData.year_level;
+                selectedYear = grouped[profileYear] ? profileYear : years[0];
             }
+
+            years.forEach(year => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'period-btn' + (year === selectedYear ? ' active' : '');
+                button.innerHTML = `<i class="fa-solid fa-calendar-days"></i> ${escapeHtml(year)}`;
+                button.addEventListener('click', () => {
+                    selectedYear = year;
+                    selectedSemester = null;
+                    renderRecordsTable(globalCurriculumData, true);
+                });
+                yearSelector.appendChild(button);
+            });
+
+            const semesters = getOrderedSemesters(grouped[selectedYear]);
+
+            // Preserve the selected semester if it still exists. Otherwise use
+            // the first available semester for the selected college year.
+            if (!selectedSemester || !grouped[selectedYear][selectedSemester]) {
+                selectedSemester = semesters[0];
+            }
+
+            semesterSelector.classList.remove('hidden');
+
+            semesters.forEach(sem => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'period-btn' + (sem === selectedSemester ? ' active' : '');
+                button.innerHTML = `<i class="fa-solid fa-book-open"></i> ${escapeHtml(sem)}`;
+                button.addEventListener('click', () => {
+                    selectedSemester = sem;
+                    renderRecordsTable(globalCurriculumData, true);
+                });
+                semesterButtons.appendChild(button);
+            });
+
+            const records = grouped[selectedYear][selectedSemester] || [];
+
+            if (records.length === 0) {
+                container.innerHTML = `
+                    <div class="records-empty">
+                        <i class="fa-solid fa-folder-open"></i>
+                        <div>No records are available for ${escapeHtml(selectedYear)} - ${escapeHtml(selectedSemester)}.</div>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = `<div class="semester-title">${escapeHtml(selectedYear)} - ${escapeHtml(selectedSemester)}</div>`;
+
+            let table = `
+                <table class="records-table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Descriptive Title</th>
+                            <th>Units</th>
+                            <th>Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+            records.forEach(r => {
+                table += `
+                    <tr>
+                        <td>${escapeHtml(r.course_code)}</td>
+                        <td>${escapeHtml(r.descriptive_title)}</td>
+                        <td>${escapeHtml(r.units)}</td>
+                        <td>${escapeHtml(r.grade || '-')}</td>
+                    </tr>`;
+            });
+
+            table += `
+                    </tbody>
+                </table>`;
+
+            container.innerHTML += table;
         }
 
         function toggleSidebar() {
