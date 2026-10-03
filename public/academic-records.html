@@ -246,10 +246,7 @@
             align-items: center;
             gap: 2.5rem;
             border: 1px solid rgba(255, 255, 255, 0.7);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
         }
         .profile-card.collapsed {
             position: fixed;
@@ -930,25 +927,7 @@
         }
 
         function initHeaderScrollWatcher() {
-            const profileCard = document.querySelector('.profile-card');
-            const welcomeHeader = document.querySelector('.welcome-header');
-            
-            if (!profileCard) return;
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 60) {
-                    profileCard.classList.add('collapsed');
-                    if (welcomeHeader) {
-                        welcomeHeader.style.opacity = '0';
-                        welcomeHeader.style.visibility = 'hidden';
-                    }
-                } else {
-                    profileCard.classList.remove('collapsed');
-                    if (welcomeHeader) {
-                        welcomeHeader.style.opacity = '1';
-                        welcomeHeader.style.visibility = 'visible';
-                    }
-                }
-            });
+            // Profile card remains in its normal position while scrolling.
         }
 
         window.addEventListener('DOMContentLoaded', () => {
