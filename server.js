@@ -447,6 +447,287 @@ app.get('/api/admin/students', async (req, res) => {
     }
 });
 
+// =========================================================
+// 6. GET CURRICULUM WITH STUDENT GRADES
+// =========================================================
+
+app.get('/api/get-curriculum-with-grades/:studentId', async (req, res) => {
+    try {
+
+        const studentId = req.params.studentId;
+
+        if (!studentId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Student ID is required.'
+            });
+        }
+
+
+        // -------------------------------------------------
+        // GET ALL CURRICULUM SUBJECTS
+        // -------------------------------------------------
+
+        const {
+            data: curriculum,
+            error: curriculumError
+        } = await supabase
+            .from('curriculum')
+            .select(`
+                id,
+                course_code,
+                descriptive_title,
+                units,
+                year_level,
+                semester
+            `)
+            .order('year_level')
+            .order('semester')
+            .order('course_code');
+
+
+        if (curriculumError) {
+            throw curriculumError;
+        }
+
+
+        // -------------------------------------------------
+        // GET THIS STUDENT'S GRADES
+        // -------------------------------------------------
+
+        const {
+            data: grades,
+            error: gradesError
+        } = await supabase
+            .from('grades')
+            .select(`
+                student_id,
+                course_code,
+                grade
+            `)
+            .eq('student_id', studentId);
+
+
+        if (gradesError) {
+            throw gradesError;
+        }
+
+
+        // -------------------------------------------------
+        // MATCH GRADES WITH CURRICULUM
+        // -------------------------------------------------
+
+        const gradeMap = {};
+
+        (grades || []).forEach(record => {
+
+            gradeMap[
+                String(record.course_code).trim().toLowerCase()
+            ] = record.grade;
+
+        });
+
+
+        const combinedData = (curriculum || []).map(course => {
+
+            const courseCode =
+                String(course.course_code || '').trim();
+
+            const grade =
+                gradeMap[
+                    courseCode.toLowerCase()
+                ] ?? '';
+
+
+            return {
+                id: course.id,
+                course_code: courseCode,
+                descriptive_title: course.descriptive_title,
+                units: course.units,
+                year_level: course.year_level,
+                semester: course.semester,
+                grade: grade
+            };
+
+        });
+
+
+        console.log(
+            `Loaded curriculum and grades for student ${studentId}:`,
+            combinedData.length,
+            'subjects'
+        );
+
+
+        res.status(200).json({
+            success: true,
+            student_id: studentId,
+            data: combinedData
+        });
+
+
+    } catch (error) {
+
+        console.error(
+            'Curriculum + Grades Error:',
+            error
+        );
+
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+});
+
+
+// =========================================================
+// 7. SAVE STUDENT GRADES
+// =========================================================
+
+app.post('/api/save-grades', async (req, res) => {
+
+    try {
+
+        const { records } = req.body;
+
+
+        if (!Array.isArray(records)) {
+
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid grade records.'
+            });
+
+        }
+
+
+        if (records.length === 0) {
+
+            return res.status(400).json({
+                success: false,
+                message: 'No grades were submitted.'
+            });
+
+        }
+
+
+        for (const record of records) {
+
+            const studentId =
+                String(record.student_id || '').trim();
+
+            const courseCode =
+                String(record.course_code || '').trim();
+
+            const grade =
+                String(record.grade ?? '').trim();
+
+
+            if (!studentId || !courseCode) {
+                continue;
+            }
+
+
+            // -------------------------------------------------
+            // CHECK IF THIS STUDENT ALREADY HAS THIS GRADE
+            // -------------------------------------------------
+
+            const {
+                data: existing,
+                error: findError
+            } = await supabase
+                .from('grades')
+                .select('id')
+                .eq('student_id', studentId)
+                .eq('course_code', courseCode)
+                .maybeSingle();
+
+
+            if (findError) {
+                throw findError;
+            }
+
+
+            // -------------------------------------------------
+            // UPDATE EXISTING GRADE
+            // -------------------------------------------------
+
+            if (existing) {
+
+                const {
+                    error: updateError
+                } = await supabase
+                    .from('grades')
+                    .update({
+                        grade: grade || null
+                    })
+                    .eq('id', existing.id);
+
+
+                if (updateError) {
+                    throw updateError;
+                }
+
+            }
+
+            // -------------------------------------------------
+            // INSERT NEW GRADE
+            // -------------------------------------------------
+
+            else {
+
+                const {
+                    error: insertError
+                } = await supabase
+                    .from('grades')
+                    .insert([{
+                        student_id: studentId,
+                        course_code: courseCode,
+                        grade: grade || null
+                    }]);
+
+
+                if (insertError) {
+                    throw insertError;
+                }
+
+            }
+
+        }
+
+
+        console.log(
+            'Grades successfully saved for:',
+            records[0]?.student_id
+        );
+
+
+        res.status(200).json({
+            success: true,
+            message: 'Grades saved successfully.'
+        });
+
+
+    } catch (error) {
+
+        console.error(
+            'Save Grades Error:',
+            error
+        );
+
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+
+});
+
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
