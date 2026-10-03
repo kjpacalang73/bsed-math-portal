@@ -767,277 +767,319 @@
 
         // Custom Strict 2-Page PDF Form Generator mapping date_of_birth from Supabase & larger student name
         async function downloadPDFForm() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'mm', 'a4'); // A4 dimensions: 210 x 297 mm
-            
-            const sName = document.getElementById('student_name').innerText;
-            const sId = document.getElementById('student_id').innerText;
-            const sYear = document.getElementById('student_year').innerText;
-            const sStatus = document.getElementById('student_status').innerText;
-            const sPhotoSrc = document.getElementById('student_photo').src;
-            
-            // Mapped correctly to use date_of_birth from Supabase table response data
-            let sBirthdate = globalProfileData.date_of_birth || globalProfileData.birthdate || 'N/A';
-if (sBirthdate !== 'N/A') {
-    const parsedDate = new Date(sBirthdate);
-    if (!isNaN(parsedDate)) {
-        sBirthdate = parsedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-    }
-}
-            const sAddress = globalProfileData.address || globalProfileData.present_address || 'PRK.6, BRGY. ACMONAN, TUPI, SOUTH COTABATO';
-
-            const logoUrl = 'https://lh3.googleusercontent.com/d/1s1s802Y7n5PgAX4dLZ6cZzRhYhN_ofTA';
-            const logoImg = new Image();
-            logoImg.crossOrigin = 'Anonymous';
-            logoImg.src = logoUrl;
-            await new Promise((resolve) => {
-                logoImg.onload = resolve;
-                logoImg.onerror = resolve;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4'); // A4 dimensions: 210 x 297 mm
+    
+    const sName = document.getElementById('student_name').innerText;
+    const sId = document.getElementById('student_id').innerText;
+    const sYear = document.getElementById('student_year').innerText;
+    const sStatus = document.getElementById('student_status').innerText;
+    const sPhotoSrc = document.getElementById('student_photo').src;
+    
+    // Mapped correctly to use date_of_birth from Supabase table response data
+    let sBirthdate = globalProfileData.date_of_birth || globalProfileData.birthdate || 'N/A';
+    if (sBirthdate !== 'N/A') {
+        const parsedDate = new Date(sBirthdate);
+        if (!isNaN(parsedDate)) {
+            sBirthdate = parsedDate.toLocaleDateString('en-US', { 
+                month: 'long', 
+                day: 'numeric', 
+                year: 'numeric' 
             });
-
-            const profileImg = new Image();
-            profileImg.crossOrigin = 'Anonymous';
-            profileImg.src = sPhotoSrc;
-            await new Promise((resolve) => {
-                profileImg.onload = resolve;
-                profileImg.onerror = resolve;
-            });
-
-            // Page 1 Header Layout
-            function drawPage1Header() {
-                if (logoImg.complete && logoImg.naturalWidth !== 0) {
-                    doc.setGState(new doc.GState({ opacity: 0.20 }));
-                    doc.addImage(logoImg, 'PNG', 55, 85, 100, 100);
-                    doc.setGState(new doc.GState({ opacity: 1.0 }));
-                }
-
-                doc.setFont("Times", "bold");
-                doc.setFontSize(10.5);
-                doc.setTextColor(0, 34, 68);
-                doc.text("ADVENTIST COLLEGE OF TECHNOLOGY, INC.", 105, 12, { align: "center" });
-                
-                doc.setFont("Times", "italic");
-                doc.setFontSize(8);
-                doc.setTextColor(80, 80, 80);
-                doc.text("(Formerly: Matutum View Christian College)", 105, 16, { align: "center" });
-                doc.text('"An Institution of Faith and Skills Development"', 105, 20, { align: "center" });
-
-                doc.setFont("Times", "italic");
-                doc.setFontSize(8.5);
-                doc.setTextColor(0, 34, 68);
-                doc.text("BSED MATHEMATICS DEPARTMENT", 105, 24.5, { align: "center" });
-
-                doc.setDrawColor(0, 34, 68);
-                doc.setLineWidth(0.6);
-                doc.line(15, 27, 195, 27);
-
-                doc.setFont("Helvetica", "bold");
-                doc.setFontSize(11);
-                doc.setTextColor(0, 34, 68);
-                doc.text("BSED MATHEMATICS EVALUATION FORM", 105, 33, { align: "center" });
-            }
-
-            // Page 2 Header Layout
-            function drawPage2Header() {
-                if (logoImg.complete && logoImg.naturalWidth !== 0) {
-                    doc.setGState(new doc.GState({ opacity: 0.20 }));
-                    doc.addImage(logoImg, 'PNG', 55, 85, 100, 100);
-                    doc.setGState(new doc.GState({ opacity: 1.0 }));
-                }
-
-                doc.setFont("Helvetica", "bold");
-                doc.setFontSize(8.5);
-                doc.setTextColor(0, 0, 0);
-                doc.text(`Name:   ${sName}`, 15, 12);
-                doc.text(`Page: 2 of 2`, 195, 12, { align: "right" });
-
-                doc.setDrawColor(0, 0, 0);
-                doc.setLineWidth(0.5);
-                doc.line(15, 15, 195, 15);
-            }
-
-            // Student Profile Section Box with larger Student Name font
-            function drawProfileSection(startY) {
-                doc.setFillColor(255, 255, 255);
-                doc.setDrawColor(200, 200, 200);
-                doc.roundedRect(15, startY, 180, 26, 2, 2, 'FD');
-
-                if (profileImg.complete && profileImg.naturalWidth !== 0 && !sPhotoSrc.includes('placehold.co')) {
-                    try {
-                        doc.addImage(profileImg, 'JPEG', 18, startY + 2.5, 21, 21);
-                    } catch(e) {
-                        doc.setFillColor(230, 230, 230);
-                        doc.rect(18, startY + 2.5, 21, 21, 'F');
-                    }
-                } else {
-                    doc.setFillColor(230, 230, 230);
-                    doc.rect(18, startY + 2.5, 21, 21, 'F');
-                }
-                doc.setDrawColor(0, 34, 68);
-                doc.rect(18, startY + 2.5, 21, 21);
-
-                // Increased font size for student name
-                doc.setFont("Helvetica", "bold");
-                doc.setFontSize(13.5);
-                doc.setTextColor(0, 34, 68);
-                doc.text(sName, 43, startY + 8);
-
-                doc.setFont("Helvetica", "normal");
-                doc.setFontSize(9);
-                doc.setTextColor(30, 41, 59);
-                doc.text(`Student ID: ${sId}`, 43, startY + 14);
-                doc.text(`Birthdate: ${sBirthdate}`, 43, startY + 19);
-                doc.text(`Address: ${sAddress}`, 43, startY + 24);
-
-                // Stacked & Larger Year Level Badge (Top)
-                doc.setFillColor(239, 246, 255);
-                doc.setDrawColor(191, 219, 254);
-                doc.roundedRect(150, startY + 4, 38, 7.5, 1.5, 1.5, 'FD');
-                doc.setFont("Helvetica", "bold");
-                doc.setFontSize(9);
-                doc.setTextColor(30, 64, 175);
-                doc.text(sYear, 169, startY + 9, { align: 'center' });
-
-                // Stacked & Larger Academic Status Badge (Bottom)
-                doc.setFillColor(240, 253, 244);
-                doc.setDrawColor(187, 247, 208);
-                doc.roundedRect(150, startY + 14, 38, 7.5, 1.5, 1.5, 'FD');
-                doc.setFont("Helvetica", "bold");
-                doc.setFontSize(9);
-                doc.setTextColor(22, 101, 52);
-                doc.text(sStatus, 169, startY + 19, { align: 'center' });
-            }
-
-            // Group curriculum records
-            const grouped = globalCurriculumData.reduce((acc, curr) => {
-                const year = curr.year_level || '1st Year';
-                const sem = curr.semester || '1st Semester';
-                if (!acc[year]) acc[year] = {};
-                if (!acc[year][sem]) acc[year][sem] = [];
-                acc[year][sem].push(curr);
-                return acc;
-            }, {});
-
-            function renderTranscriptTable(startX, startY, width, items, semesterTitleStr) {
-                let currentY = startY;
-                const baseRowHeight = 5.5;
-
-                doc.setFont("Helvetica", "bold");
-                doc.setFontSize(8.5);
-
-                doc.setFillColor(0, 34, 68);
-                doc.setTextColor(255, 255, 255);
-                doc.rect(startX, currentY, width, 5.5, 'FD');
-                doc.text(semesterTitleStr, startX + 3, currentY + 3.8);
-                currentY += 5.5;
-
-                doc.setFillColor(241, 245, 249);
-                doc.setTextColor(30, 41, 59);
-                doc.rect(startX, currentY, width, 5.5, 'FD');
-                doc.text("Code", startX + 3, currentY + 3.8);
-                doc.text("Descriptive Title", startX + 42, currentY + 3.8);
-                doc.text("Units", startX + 152, currentY + 3.8, { align: 'center' });
-                doc.text("Grade", startX + 172, currentY + 3.8, { align: 'center' });
-                currentY += 5.5;
-
-                doc.setFont("Helvetica", "normal");
-                doc.setFontSize(8);
-
-                items.forEach((item) => {
-                    let title = String(item.descriptive_title || '');
-                    let splitTitle = doc.splitTextToSize(title, 105);
-                    let rowH = splitTitle.length > 1 ? 8 : baseRowHeight;
-
-                    doc.setDrawColor(226, 232, 240);
-                    doc.rect(startX, currentY, width, rowH);
-
-                    doc.text(String(item.course_code || ''), startX + 3, currentY + 3.8);
-                    
-                    if (splitTitle.length > 1) {
-                        doc.text(splitTitle[0], startX + 42, currentY + 3.2);
-                        doc.text(splitTitle[1], startX + 42, currentY + 6.5);
-                    } else {
-                        doc.text(title, startX + 42, currentY + 3.8);
-                    }
-
-                    doc.text(String(item.units || '3'), startX + 152, currentY + 3.8, { align: 'center' });
-                    doc.text(String(item.grade || '-'), startX + 172, currentY + 3.8, { align: 'center' });
-
-                    currentY += rowH;
-                });
-
-                return currentY + 3;
-            }
-
-            const y1_1st = grouped['1st Year'] && grouped['1st Year']['1st Semester'] ? grouped['1st Year']['1st Semester'] : [];
-            const y1_2nd = grouped['1st Year'] && grouped['1st Year']['2nd Semester'] ? grouped['1st Year']['2nd Semester'] : [];
-            const y2_1st = grouped['2nd Year'] && grouped['2nd Year']['1st Semester'] ? grouped['2nd Year']['1st Semester'] : [];
-            const y2_2nd = grouped['2nd Year'] && grouped['2nd Year']['2nd Semester'] ? grouped['2nd Year']['2nd Semester'] : [];
-            const y3_1st = grouped['3rd Year'] && grouped['3rd Year']['1st Semester'] ? grouped['3rd Year']['1st Semester'] : [];
-            const y3_2nd = grouped['3rd Year'] && grouped['3rd Year']['2nd Semester'] ? grouped['3rd Year']['2nd Semester'] : [];
-            const y4_1st = grouped['4th Year'] && grouped['4th Year']['1st Semester'] ? grouped['4th Year']['1st Semester'] : [];
-            const y4_2nd = grouped['4th Year'] && grouped['4th Year']['2nd Semester'] ? grouped['4th Year']['2nd Semester'] : [];
-
-            // ================= PAGE 1 =================
-            drawPage1Header();
-            drawProfileSection(36);
-
-            let p1_y = 65;
-            if (y1_1st.length > 0) p1_y = renderTranscriptTable(15, p1_y, 180, y1_1st, "1st Year - 1st Semester");
-            if (y1_2nd.length > 0) p1_y = renderTranscriptTable(15, p1_y, 180, y1_2nd, "1st Year - 2nd Semester");
-            if (y2_1st.length > 0 && p1_y < 250) {
-                renderTranscriptTable(15, p1_y, 180, y2_1st, "2nd Year - 1st Semester");
-            }
-
-            // ================= PAGE 2 =================
-            doc.addPage();
-            drawPage2Header();
-
-            let p2_y = 18;
-            let startYear2Sem1 = (p1_y >= 250) ? y2_1st : [];
-            if (startYear2Sem1.length > 0) {
-                p2_y = renderTranscriptTable(15, p2_y, 180, startYear2Sem1, "2nd Year - 1st Semester");
-            }
-            if (y2_2nd.length > 0) {
-                p2_y = renderTranscriptTable(15, p2_y, 180, y2_2nd, "2nd Year - 2nd Semester");
-            }
-            if (y3_1st.length > 0) {
-                p2_y = renderTranscriptTable(15, p2_y, 180, y3_1st, "3rd Year - 1st Semester");
-            }
-            if (y3_2nd.length > 0) {
-                p2_y = renderTranscriptTable(15, p2_y, 180, y3_2nd, "3rd Year - 2nd Semester");
-            }
-            if (y4_1st.length > 0) {
-                p2_y = renderTranscriptTable(15, p2_y, 180, y4_1st, "4th Year - 1st Semester");
-            }
-            if (y4_2nd.length > 0) {
-                p2_y = renderTranscriptTable(15, p2_y, 180, y4_2nd, "4th Year - 2nd Semester");
-            }
-
-            p2_y += 4;
-            doc.setFont("Helvetica", "bold");
-            doc.setFontSize(7.5);
-            doc.setTextColor(0, 34, 68);
-            
-            const disclaimerText = "THIS DOCUMENT IS INTENDED SOLELY FOR EVALUATION PURPOSES WITHIN ADVENTIST COLLEGE OF TECHNOLOGY, INC. IT IS NOT AN OFFICIAL INSTITUTIONAL DOCUMENT AND SHALL NOT BE USED, REPRODUCED, OR RELIED UPON FOR ANY PURPOSE OUTSIDE ITS INTENDED USE OR OUTSIDE ADVENTIST COLLEGE OF TECHNOLOGY, INC.";
-            const splitDisclaimer = doc.splitTextToSize(disclaimerText, 170);
-            doc.text(splitDisclaimer, 105, p2_y, { align: "center" });
-
-            p2_y += 14;
-            doc.setFont("Courier", "bold");
-            doc.setFontSize(7);
-            doc.setTextColor(0, 0, 0);
-            doc.text("LEGEND FOR GRADING SYSTEM", 15, p2_y);
-            p2_y += 4;
-            
-            doc.setDrawColor(0, 0, 0);
-            doc.rect(15, p2_y, 180, 12);
-            doc.text("Letter Grades     A      A-      B+      B      B-      C+      C      C-      D      F", 18, p2_y + 4);
-            doc.text("Percentage      100-98  97-95   94-92   91-89   88-86   85-83   82-80   79-77   76-75  FAILING", 18, p2_y + 8);
-            doc.text("Honor Points     4.0     3.7     3.3     3.0     2.7     2.3     2.0     1.5     1.0     0", 18, p2_y + 11);
-
-            doc.save(`BSED_Math_Evaluation_Form_${sId}.pdf`);
         }
+    }
+
+    const sAddress = globalProfileData.address || globalProfileData.present_address || 'PRK.6, BRGY. ACMONAN, TUPI, SOUTH COTABATO';
+
+    const logoUrl = 'https://lh3.googleusercontent.com/d/1s1s802Y7n5PgAX4dLZ6cZzRhYhN_ofTA';
+    const logoImg = new Image();
+    logoImg.crossOrigin = 'Anonymous';
+    logoImg.src = logoUrl;
+    await new Promise((resolve) => {
+        logoImg.onload = resolve;
+        logoImg.onerror = resolve;
+    });
+
+    const profileImg = new Image();
+    profileImg.crossOrigin = 'Anonymous';
+    profileImg.src = sPhotoSrc;
+    await new Promise((resolve) => {
+        profileImg.onload = resolve;
+        profileImg.onerror = resolve;
+    });
+
+    // ============================================================
+    // PREVIEW ONLY WATERMARK
+    // ============================================================
+    function drawPreviewWatermark() {
+        doc.saveGraphicsState();
+
+        doc.setTextColor(0, 34, 68);
+        doc.setGState(new doc.GState({ opacity: 0.12 }));
+
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(42);
+
+        doc.text("PREVIEW ONLY", 105, 110, {
+            align: "center",
+            angle: 45
+        });
+
+        doc.text("PREVIEW ONLY", 105, 220, {
+            align: "center",
+            angle: 45
+        });
+
+        doc.restoreGraphicsState();
+    }
+
+    // Page 1 Header Layout
+    function drawPage1Header() {
+        if (logoImg.complete && logoImg.naturalWidth !== 0) {
+            doc.setGState(new doc.GState({ opacity: 0.20 }));
+            doc.addImage(logoImg, 'PNG', 55, 85, 100, 100);
+            doc.setGState(new doc.GState({ opacity: 1.0 }));
+        }
+
+        doc.setFont("Times", "bold");
+        doc.setFontSize(10.5);
+        doc.setTextColor(0, 34, 68);
+        doc.text("ADVENTIST COLLEGE OF TECHNOLOGY, INC.", 105, 12, { align: "center" });
+        
+        doc.setFont("Times", "italic");
+        doc.setFontSize(8);
+        doc.setTextColor(80, 80, 80);
+        doc.text("(Formerly: Matutum View Christian College)", 105, 16, { align: "center" });
+        doc.text('"An Institution of Faith and Skills Development"', 105, 20, { align: "center" });
+
+        doc.setFont("Times", "italic");
+        doc.setFontSize(8.5);
+        doc.setTextColor(0, 34, 68);
+        doc.text("BSED MATHEMATICS DEPARTMENT", 105, 24.5, { align: "center" });
+
+        doc.setDrawColor(0, 34, 68);
+        doc.setLineWidth(0.6);
+        doc.line(15, 27, 195, 27);
+
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(11);
+        doc.setTextColor(0, 34, 68);
+        doc.text("BSED MATHEMATICS EVALUATION FORM", 105, 33, { align: "center" });
+    }
+
+    // Page 2 Header Layout
+    function drawPage2Header() {
+        if (logoImg.complete && logoImg.naturalWidth !== 0) {
+            doc.setGState(new doc.GState({ opacity: 0.20 }));
+            doc.addImage(logoImg, 'PNG', 55, 85, 100, 100);
+            doc.setGState(new doc.GState({ opacity: 1.0 }));
+        }
+
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(8.5);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Name:   ${sName}`, 15, 12);
+        doc.text(`Page: 2 of 2`, 195, 12, { align: "right" });
+
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.5);
+        doc.line(15, 15, 195, 15);
+    }
+
+    // Student Profile Section Box with larger Student Name font
+    function drawProfileSection(startY) {
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(200, 200, 200);
+        doc.roundedRect(15, startY, 180, 26, 2, 2, 'FD');
+
+        if (profileImg.complete && profileImg.naturalWidth !== 0 && !sPhotoSrc.includes('placehold.co')) {
+            try {
+                doc.addImage(profileImg, 'JPEG', 18, startY + 2.5, 21, 21);
+            } catch(e) {
+                doc.setFillColor(230, 230, 230);
+                doc.rect(18, startY + 2.5, 21, 21, 'F');
+            }
+        } else {
+            doc.setFillColor(230, 230, 230);
+            doc.rect(18, startY + 2.5, 21, 21, 'F');
+        }
+
+        doc.setDrawColor(0, 34, 68);
+        doc.rect(18, startY + 2.5, 21, 21);
+
+        // Increased font size for student name
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(13.5);
+        doc.setTextColor(0, 34, 68);
+        doc.text(sName, 43, startY + 8);
+
+        doc.setFont("Helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(30, 41, 59);
+        doc.text(`Student ID: ${sId}`, 43, startY + 14);
+        doc.text(`Birthdate: ${sBirthdate}`, 43, startY + 19);
+        doc.text(`Address: ${sAddress}`, 43, startY + 24);
+
+        // Stacked & Larger Year Level Badge (Top)
+        doc.setFillColor(239, 246, 255);
+        doc.setDrawColor(191, 219, 254);
+        doc.roundedRect(150, startY + 4, 38, 7.5, 1.5, 1.5, 'FD');
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(30, 64, 175);
+        doc.text(sYear, 169, startY + 9, { align: 'center' });
+
+        // Stacked & Larger Academic Status Badge (Bottom)
+        doc.setFillColor(240, 253, 244);
+        doc.setDrawColor(187, 247, 208);
+        doc.roundedRect(150, startY + 14, 38, 7.5, 1.5, 1.5, 'FD');
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(22, 101, 52);
+        doc.text(sStatus, 169, startY + 19, { align: 'center' });
+    }
+
+    // Group curriculum records
+    const grouped = globalCurriculumData.reduce((acc, curr) => {
+        const year = curr.year_level || '1st Year';
+        const sem = curr.semester || '1st Semester';
+        if (!acc[year]) acc[year] = {};
+        if (!acc[year][sem]) acc[year][sem] = [];
+        acc[year][sem].push(curr);
+        return acc;
+    }, {});
+
+    function renderTranscriptTable(startX, startY, width, items, semesterTitleStr) {
+        let currentY = startY;
+        const baseRowHeight = 5.5;
+
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(8.5);
+
+        doc.setFillColor(0, 34, 68);
+        doc.setTextColor(255, 255, 255);
+        doc.rect(startX, currentY, width, 5.5, 'FD');
+        doc.text(semesterTitleStr, startX + 3, currentY + 3.8);
+        currentY += 5.5;
+
+        doc.setFillColor(241, 245, 249);
+        doc.setTextColor(30, 41, 59);
+        doc.rect(startX, currentY, width, 5.5, 'FD');
+        doc.text("Code", startX + 3, currentY + 3.8);
+        doc.text("Descriptive Title", startX + 42, currentY + 3.8);
+        doc.text("Units", startX + 152, currentY + 3.8, { align: 'center' });
+        doc.text("Grade", startX + 172, currentY + 3.8, { align: 'center' });
+        currentY += 5.5;
+
+        doc.setFont("Helvetica", "normal");
+        doc.setFontSize(8);
+
+        items.forEach((item) => {
+            let title = String(item.descriptive_title || '');
+            let splitTitle = doc.splitTextToSize(title, 105);
+            let rowH = splitTitle.length > 1 ? 8 : baseRowHeight;
+
+            doc.setDrawColor(226, 232, 240);
+            doc.rect(startX, currentY, width, rowH);
+
+            doc.text(String(item.course_code || ''), startX + 3, currentY + 3.8);
+            
+            if (splitTitle.length > 1) {
+                doc.text(splitTitle[0], startX + 42, currentY + 3.2);
+                doc.text(splitTitle[1], startX + 42, currentY + 6.5);
+            } else {
+                doc.text(title, startX + 42, currentY + 3.8);
+            }
+
+            doc.text(String(item.units || '3'), startX + 152, currentY + 3.8, { align: 'center' });
+            doc.text(String(item.grade || '-'), startX + 172, currentY + 3.8, { align: 'center' });
+
+            currentY += rowH;
+        });
+
+        return currentY + 3;
+    }
+
+    const y1_1st = grouped['1st Year'] && grouped['1st Year']['1st Semester'] ? grouped['1st Year']['1st Semester'] : [];
+    const y1_2nd = grouped['1st Year'] && grouped['1st Year']['2nd Semester'] ? grouped['1st Year']['2nd Semester'] : [];
+    const y2_1st = grouped['2nd Year'] && grouped['2nd Year']['1st Semester'] ? grouped['2nd Year']['1st Semester'] : [];
+    const y2_2nd = grouped['2nd Year'] && grouped['2nd Year']['2nd Semester'] ? grouped['2nd Year']['2nd Semester'] : [];
+    const y3_1st = grouped['3rd Year'] && grouped['3rd Year']['1st Semester'] ? grouped['3rd Year']['1st Semester'] : [];
+    const y3_2nd = grouped['3rd Year'] && grouped['3rd Year']['2nd Semester'] ? grouped['3rd Year']['2nd Semester'] : [];
+    const y4_1st = grouped['4th Year'] && grouped['4th Year']['1st Semester'] ? grouped['4th Year']['1st Semester'] : [];
+    const y4_2nd = grouped['4th Year'] && grouped['4th Year']['2nd Semester'] ? grouped['4th Year']['2nd Semester'] : [];
+
+    // ================= PAGE 1 =================
+    drawPreviewWatermark();
+    drawPage1Header();
+    drawProfileSection(36);
+
+    let p1_y = 65;
+    if (y1_1st.length > 0) p1_y = renderTranscriptTable(15, p1_y, 180, y1_1st, "1st Year - 1st Semester");
+    if (y1_2nd.length > 0) p1_y = renderTranscriptTable(15, p1_y, 180, y1_2nd, "1st Year - 2nd Semester");
+    if (y2_1st.length > 0 && p1_y < 250) {
+        renderTranscriptTable(15, p1_y, 180, y2_1st, "2nd Year - 1st Semester");
+    }
+
+    // ================= PAGE 2 =================
+    doc.addPage();
+    drawPreviewWatermark();
+    drawPage2Header();
+
+    let p2_y = 18;
+    let startYear2Sem1 = (p1_y >= 250) ? y2_1st : [];
+
+    if (startYear2Sem1.length > 0) {
+        p2_y = renderTranscriptTable(15, p2_y, 180, startYear2Sem1, "2nd Year - 1st Semester");
+    }
+
+    if (y2_2nd.length > 0) {
+        p2_y = renderTranscriptTable(15, p2_y, 180, y2_2nd, "2nd Year - 2nd Semester");
+    }
+
+    if (y3_1st.length > 0) {
+        p2_y = renderTranscriptTable(15, p2_y, 180, y3_1st, "3rd Year - 1st Semester");
+    }
+
+    if (y3_2nd.length > 0) {
+        p2_y = renderTranscriptTable(15, p2_y, 180, y3_2nd, "3rd Year - 2nd Semester");
+    }
+
+    if (y4_1st.length > 0) {
+        p2_y = renderTranscriptTable(15, p2_y, 180, y4_1st, "4th Year - 1st Semester");
+    }
+
+    if (y4_2nd.length > 0) {
+        p2_y = renderTranscriptTable(15, p2_y, 180, y4_2nd, "4th Year - 2nd Semester");
+    }
+
+    p2_y += 4;
+
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(7.5);
+    doc.setTextColor(0, 34, 68);
+    
+    const disclaimerText = "THIS DOCUMENT IS INTENDED SOLELY FOR EVALUATION PURPOSES WITHIN ADVENTIST COLLEGE OF TECHNOLOGY, INC. IT IS NOT AN OFFICIAL INSTITUTIONAL DOCUMENT AND SHALL NOT BE USED, REPRODUCED, OR RELIED UPON FOR ANY PURPOSE OUTSIDE ITS INTENDED USE OR OUTSIDE ADVENTIST COLLEGE OF TECHNOLOGY, INC.";
+
+    const splitDisclaimer = doc.splitTextToSize(disclaimerText, 170);
+    doc.text(splitDisclaimer, 105, p2_y, { align: "center" });
+
+    p2_y += 14;
+
+    doc.setFont("Courier", "bold");
+    doc.setFontSize(7);
+    doc.setTextColor(0, 0, 0);
+    doc.text("LEGEND FOR GRADING SYSTEM", 15, p2_y);
+    p2_y += 4;
+    
+    doc.setDrawColor(0, 0, 0);
+    doc.rect(15, p2_y, 180, 12);
+    doc.text("Letter Grades     A      A-      B+      B      B-      C+      C      C-      D      F", 18, p2_y + 4);
+    doc.text("Percentage      100-98  97-95   94-92   91-89   88-86   85-83   82-80   79-77   76-75  FAILING", 18, p2_y + 8);
+    doc.text("Honor Points     4.0     3.7     3.3     3.0     2.7     2.3     2.0     1.5     1.0     0", 18, p2_y + 11);
+
+    doc.save(`BSED_Math_Evaluation_Form_${sId}.pdf`);
+}
     </script>
 
     <!-- Image Magnifier Modal Overlay -->
