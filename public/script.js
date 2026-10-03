@@ -31,8 +31,15 @@ if (loginForm) {
                     alert('Welcome back, Admin!');
                     window.location.href = '/admin.html'; 
                 } else {
-                    alert('Login successful!');
-                    window.location.href = '/profile.html'; 
+                    showNotification(
+                        "Login Successful",
+                        "Welcome back! Redirecting to your student portal.",
+                        "success"
+                    );
+
+                    setTimeout(() => {
+                        window.location.href = '/profile.html';
+                    }, 1500);
                 }
             } else {
                 alert("❌ Login failed: " + result.message);
@@ -136,3 +143,71 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+
+// ==========================================
+// CUSTOM NOTIFICATION
+// ==========================================
+
+function showNotification(title, message, type = "success") {
+
+    const existing = document.querySelector(".custom-notification");
+
+    if (existing) {
+        existing.remove();
+    }
+
+    const notification = document.createElement("div");
+
+    notification.className = `custom-notification ${type}`;
+
+    notification.innerHTML = `
+        <div class="notification-icon">
+            <i class="fa-solid fa-check"></i>
+        </div>
+
+        <div class="notification-content">
+            <div class="notification-title">${title}</div>
+            <div class="notification-message">${message}</div>
+        </div>
+
+        <button class="notification-close" aria-label="Close">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    `;
+
+    document.body.appendChild(notification);
+
+    // Close button
+    notification
+        .querySelector(".notification-close")
+        .addEventListener("click", () => {
+
+            notification.classList.remove("show");
+
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+
+        });
+
+    // Show notification
+    requestAnimationFrame(() => {
+        notification.classList.add("show");
+    });
+
+    // Automatically close after 3 seconds
+    setTimeout(() => {
+
+        if (!notification.isConnected) return;
+
+        notification.classList.remove("show");
+
+        setTimeout(() => {
+            if (notification.isConnected) {
+                notification.remove();
+            }
+        }, 300);
+
+    }, 3000);
+}
