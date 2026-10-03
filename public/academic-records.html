@@ -630,6 +630,223 @@
             font-weight: bold;
             cursor: pointer;
         }
+
+        .custom-notification {
+    position: fixed !important;
+    top: 25px !important;
+    right: 25px !important;
+    width: 360px;
+    max-width: calc(100vw - 40px);
+    background: #ffffff !important;
+    color: #1e293b;
+    border-left: 5px solid #ffcc00;
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.30);
+    z-index: 2147483647 !important;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(120%);
+    transition: opacity 0.35s ease,
+                transform 0.35s ease,
+                visibility 0.35s ease;
+}
+
+/* =========================
+   LOGOUT CONFIRMATION MODAL
+   ========================= */
+
+.logout-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 20, 40, 0.72);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    z-index: 2147483646;
+
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity 0.25s ease,
+        visibility 0.25s ease;
+}
+
+.logout-confirm-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.logout-confirm-box {
+    width: 100%;
+    max-width: 420px;
+
+    background: #ffffff;
+    border-radius: 16px;
+
+    padding: 30px 28px 25px;
+
+    text-align: center;
+
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.35);
+
+    transform: translateY(-15px) scale(0.96);
+
+    transition:
+        transform 0.25s ease;
+}
+
+.logout-confirm-overlay.show .logout-confirm-box {
+    transform: translateY(0) scale(1);
+}
+
+.logout-confirm-icon {
+    width: 64px;
+    height: 64px;
+
+    margin: 0 auto 18px;
+
+    border-radius: 50%;
+
+    background: #002244;
+    color: #ffcc00;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 25px;
+
+    box-shadow:
+        0 6px 18px rgba(0, 34, 68, 0.25);
+}
+
+.logout-confirm-box h3 {
+    margin: 0 0 10px;
+
+    color: #002244;
+
+    font-size: 21px;
+    font-weight: 700;
+}
+
+.logout-confirm-box p {
+    margin: 0 auto 25px;
+
+    max-width: 330px;
+
+    color: #64748b;
+
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.logout-confirm-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.logout-confirm-actions button {
+    min-width: 120px;
+
+    padding: 11px 18px;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.logout-cancel-btn {
+    background: #f1f5f9;
+    color: #475569;
+
+    border: 1px solid #cbd5e1;
+}
+
+.logout-cancel-btn:hover {
+    background: #e2e8f0;
+}
+
+.logout-confirm-btn {
+    background: #002244;
+    color: #ffffff;
+
+    border: 1px solid #002244;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+}
+
+.logout-confirm-btn:hover {
+    background: #003b73;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 5px 15px rgba(0, 34, 68, 0.25);
+}
+
+@media (max-width: 600px) {
+
+    .logout-confirm-box {
+        max-width: 350px;
+        padding: 25px 20px 20px;
+    }
+
+    .logout-confirm-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 21px;
+    }
+
+    .logout-confirm-box h3 {
+        font-size: 19px;
+    }
+
+    .logout-confirm-box p {
+        font-size: 13px;
+    }
+
+    .logout-confirm-actions {
+        flex-direction: column-reverse;
+        gap: 8px;
+    }
+
+    .logout-confirm-actions button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 600px) {
+    .custom-notification {
+        top: 15px !important;
+        left: 15px !important;
+        right: 15px !important;
+        width: auto;
+        max-width: none;
+    }
+}
     </style>
 </head>
 <body>
@@ -947,12 +1164,88 @@
             loadAcademicRecords();
         });
 
-        function logout() {
-            if(confirm("Are you sure you want to securely log out of your student portal session?")) {
-                sessionStorage.removeItem('student_id');
-                window.location.href = "/";
+       function logout() {
+    const existingModal = document.getElementById("logoutConfirmModal");
+
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    const modal = document.createElement("div");
+    modal.id = "logoutConfirmModal";
+    modal.className = "logout-confirm-overlay";
+
+    modal.innerHTML = `
+        <div class="logout-confirm-box">
+
+            <div class="logout-confirm-icon">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </div>
+
+            <h3>Confirm Logout</h3>
+
+            <p>
+                Are you sure you want to securely log out
+                of your student portal session?
+            </p>
+
+            <div class="logout-confirm-actions">
+                <button type="button" class="logout-cancel-btn">
+                    Cancel
+                </button>
+
+                <button type="button" class="logout-confirm-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Log Out
+                </button>
+            </div>
+
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const cancelButton = modal.querySelector(".logout-cancel-btn");
+    const confirmButton = modal.querySelector(".logout-confirm-btn");
+
+    cancelButton.addEventListener("click", () => {
+        modal.classList.remove("show");
+
+        setTimeout(() => {
+            modal.remove();
+        }, 250);
+    });
+
+    confirmButton.addEventListener("click", () => {
+
+        sessionStorage.removeItem("student_id");
+
+        modal.classList.remove("show");
+
+        setTimeout(() => {
+            modal.remove();
+
+            if (typeof showNotification === "function") {
+                showNotification(
+                    "Logout Successful",
+                    "You have been securely logged out. Redirecting...",
+                    "success"
+                );
             }
-        }
+
+            setTimeout(() => {
+                window.location.href = "/";
+            }, 1200);
+
+        }, 250);
+    });
+
+    requestAnimationFrame(() => {
+        modal.classList.add("show");
+    });
+}
+
+window.logout = logout;
 
         function openImageMagnifier() {
             const currentPhotoSrc = document.getElementById('student_photo').src;

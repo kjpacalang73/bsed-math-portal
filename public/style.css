@@ -505,3 +505,16 @@ body {
         max-width: none;
     }
 }
+
+.custom-notification.error {
+    border-left-color: #dc2626;
+}
+
+.custom-notification.error .notification-icon {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.custom-notification.error .notification-title {
+    color: #b91c1c;
+}

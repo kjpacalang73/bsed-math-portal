@@ -42,8 +42,12 @@ if (loginForm) {
                     }, 1500);
                 }
             } else {
-                alert("❌ Login failed: " + result.message);
-            }
+    showNotification(
+        "Login Failed",
+        result.message || "The Student ID or password you entered is incorrect.",
+        "error"
+    );
+}
         } catch (error) {
             console.error('Login system communication error:', error);
             alert('❌ Something went wrong connecting to the server.');
@@ -161,10 +165,14 @@ function showNotification(title, message, type = "success") {
 
     notification.className = `custom-notification ${type}`;
 
-    notification.innerHTML = `
-        <div class="notification-icon">
-            <i class="fa-solid fa-check"></i>
-        </div>
+    const icon = type === "error"
+    ? "fa-circle-exclamation"
+    : "fa-check";
+
+notification.innerHTML = `
+    <div class="notification-icon">
+        <i class="fa-solid ${icon}"></i>
+    </div>
 
         <div class="notification-content">
             <div class="notification-title">${title}</div>
