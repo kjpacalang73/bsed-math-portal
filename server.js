@@ -1483,6 +1483,229 @@ app.get(
     }
 );
 
+// =========================================================
+// 6. STUDENT GET ACADEMIC RECORDS
+// =========================================================
+
+app.get(
+    '/api/student-academic-records/:studentId',
+    async (req, res) => {
+
+        try {
+
+            const studentId =
+                String(
+                    req.params.studentId || ''
+                ).trim();
+
+
+            if (!studentId) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        'Student ID is required.'
+
+                });
+
+            }
+
+
+            // -------------------------------------------------
+            // GET ALL CURRICULUM SUBJECTS
+            // -------------------------------------------------
+
+            const {
+                data: curriculum,
+                error: curriculumError
+            } = await supabase
+
+                .from('curriculum')
+
+                .select(`
+                    id,
+                    course_code,
+                    descriptive_title,
+                    units,
+                    year_level,
+                    semester
+                `)
+
+                .order('year_level')
+
+                .order('semester')
+
+                .order('course_code');
+
+
+            if (curriculumError) {
+                throw curriculumError;
+            }
+
+
+            // -------------------------------------------------
+            // GET THIS STUDENT'S ACADEMIC RECORDS
+            // -------------------------------------------------
+
+            const {
+                data: academicRecords,
+                error: academicRecordsError
+            } = await supabase
+
+                .from('Academic_Records')
+
+                .select(`
+                    id,
+                    student_id,
+                    course_code,
+                    descriptive_title,
+                    units,
+                    grade
+                `)
+
+                .eq(
+                    'student_id',
+                    studentId
+                );
+
+
+            if (academicRecordsError) {
+                throw academicRecordsError;
+            }
+
+
+            // -------------------------------------------------
+            // CREATE A MAP OF THE STUDENT'S GRADES
+            // -------------------------------------------------
+
+            const gradeMap = {};
+
+
+            (
+                academicRecords || []
+            ).forEach(record => {
+
+                const code =
+                    String(
+                        record.course_code || ''
+                    )
+                    .trim()
+                    .toLowerCase();
+
+
+                if (
+                    gradeMap[code] === undefined ||
+                    gradeMap[code] === ''
+                ) {
+
+                    gradeMap[code] =
+                        record.grade == null
+                            ? ''
+                            : String(
+                                record.grade
+                            ).trim();
+
+                }
+
+            });
+
+
+            // -------------------------------------------------
+            // COMBINE CURRICULUM + STUDENT GRADES
+            // -------------------------------------------------
+
+            const combinedData =
+                (curriculum || []).map(
+                    course => {
+
+                        const courseCode =
+                            String(
+                                course.course_code || ''
+                            ).trim();
+
+
+                        const normalizedCode =
+                            courseCode.toLowerCase();
+
+
+                        const grade =
+                            gradeMap[
+                                normalizedCode
+                            ] ?? '';
+
+
+                        return {
+
+                            id:
+                                course.id,
+
+                            course_code:
+                                courseCode,
+
+                            descriptive_title:
+                                course.descriptive_title,
+
+                            units:
+                                course.units,
+
+                            year_level:
+                                course.year_level,
+
+                            semester:
+                                course.semester,
+
+                            grade:
+                                grade
+
+                        };
+
+                    }
+                );
+
+
+            console.log(
+                `Student academic records loaded: ${combinedData.length} curriculum subjects for ${studentId}.`
+            );
+
+
+            res.status(200).json({
+
+                success: true,
+
+                student_id:
+                    studentId,
+
+                data:
+                    combinedData
+
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                'Student Academic Records Error:',
+                error
+            );
+
+
+            res.status(500).json({
+
+                success: false,
+
+                message:
+                    error.message ||
+                    'Failed to load academic records.'
+
+            });
+
+        }
+
+    }
+);
+
 
 // =========================================================
 // 6. GET CURRICULUM WITH STUDENT GRADES
