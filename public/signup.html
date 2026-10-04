@@ -3,183 +3,936 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>ACTI - Student Registration</title>
+
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1s1s802Y7n5PgAX4dLZ6cZzRhYhN_ofTA">
+
+    <link rel="icon" type="image/png"
+        href="https://lh3.googleusercontent.com/d/1s1s802Y7n5PgAX4dLZ6cZzRhYhN_ofTA">
+
+    <style>
+        /* =========================================================
+           REGISTRATION CONTENT ONLY
+           Header and Footer remain unchanged
+        ========================================================= */
+
+        .auth-container {
+            padding: 45px 20px 55px;
+            background: #f4f7fb;
+        }
+
+        .register-card {
+            width: min(1100px, 100%);
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 12px 35px rgba(15, 35, 65, 0.10);
+            padding: 42px 45px;
+            border: 1px solid #e4eaf1;
+        }
+
+        .registration-heading {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .portal-label {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #1d4f91;
+            background: #edf4ff;
+            padding: 7px 14px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+        }
+
+        .registration-heading h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 800;
+            color: #172b4d;
+            letter-spacing: 0.2px;
+        }
+
+        .registration-heading p {
+            margin: 10px auto 0;
+            max-width: 700px;
+            color: #667085;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        /* Section headers */
+
+        .form-section {
+            margin-top: 30px;
+        }
+
+        .form-section:first-of-type {
+            margin-top: 0;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e7ebf0;
+        }
+
+        .section-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1d4f91;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            margin: 0;
+            color: #172b4d;
+            font-size: 17px;
+            font-weight: 750;
+        }
+
+        .section-description {
+            margin: 2px 0 0;
+            color: #7a8494;
+            font-size: 12px;
+        }
+
+        /* Form grid */
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 28px;
+        }
+
+        .form-column {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 7px;
+            color: #344054;
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            box-sizing: border-box;
+            height: 46px;
+            border: 1px solid #d5dce5;
+            border-radius: 9px;
+            padding: 0 13px;
+            font-size: 14px;
+            color: #1d2939;
+            background: #ffffff;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .input-group input::placeholder {
+            color: #a0a8b5;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: #1d4f91;
+            box-shadow: 0 0 0 3px rgba(29, 79, 145, 0.10);
+        }
+
+        .input-help {
+            display: block;
+            margin-top: 5px;
+            color: #8a94a4;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        /* Full-width section */
+
+        .full-width {
+            width: 100%;
+        }
+
+        /* Photo upload */
+
+        .photo-upload-box {
+            border: 1.5px dashed #b9c5d4;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 22px;
+            margin-top: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .photo-upload-box:hover {
+            border-color: #1d4f91;
+            background: #f5f8fd;
+        }
+
+        .photo-upload-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+            color: #172b4d;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .photo-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: #eaf1fb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+        }
+
+        .photo-upload-description {
+            margin: 0 0 14px 44px;
+            color: #7a8494;
+            font-size: 12px;
+        }
+
+        .photo-upload-box input[type="file"] {
+            width: 100%;
+            font-size: 13px;
+            color: #475467;
+        }
+
+        /* Password note */
+
+        .password-note {
+            margin-top: -5px;
+            margin-bottom: 16px;
+            padding: 10px 12px;
+            background: #f7f9fc;
+            border-left: 3px solid #1d4f91;
+            border-radius: 4px;
+            color: #667085;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        /* Submit */
+
+        .registration-submit {
+            margin-top: 18px;
+            padding-top: 25px;
+            border-top: 1px solid #e7ebf0;
+            text-align: center;
+        }
+
+        .primary-btn {
+            width: 100%;
+            max-width: 420px;
+            min-height: 50px;
+            border: none;
+            border-radius: 9px;
+            background: #1d4f91;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 5px 14px rgba(29, 79, 145, 0.18);
+        }
+
+        .primary-btn:hover {
+            background: #163f75;
+            transform: translateY(-1px);
+            box-shadow: 0 7px 18px rgba(29, 79, 145, 0.23);
+        }
+
+        .primary-btn:active {
+            transform: translateY(0);
+        }
+
+        .toggle-text {
+            margin: 22px 0 0;
+            text-align: center;
+            color: #667085;
+            font-size: 13px;
+        }
+
+        .toggle-link {
+            color: #1d4f91;
+            font-weight: 700;
+        }
+
+        .toggle-link:hover {
+            text-decoration: underline !important;
+        }
+
+        /* Success message */
+
+        .registration-success {
+            display: none;
+            text-align: center;
+            padding: 45px 30px;
+        }
+
+        .success-icon {
+            width: 78px;
+            height: 78px;
+            margin: 0 auto 22px;
+            border-radius: 50%;
+            background: #eaf7ef;
+            color: #21864a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+            font-weight: 700;
+        }
+
+        .registration-success h2 {
+            margin: 0 0 10px;
+            color: #172b4d;
+            font-size: 27px;
+        }
+
+        .registration-success h3 {
+            margin: 0 0 14px;
+            color: #1d4f91;
+            font-size: 20px;
+        }
+
+        .registration-success p {
+            max-width: 620px;
+            margin: 0 auto 25px;
+            color: #667085;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .success-note {
+            max-width: 600px;
+            margin: 0 auto 25px;
+            padding: 14px 18px;
+            background: #f5f8fc;
+            border-radius: 9px;
+            color: #475467;
+            font-size: 13px;
+        }
+
+        .login-after-registration {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 220px;
+            height: 48px;
+            padding: 0 25px;
+            border-radius: 9px;
+            background: #1d4f91;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            box-shadow: 0 5px 14px rgba(29, 79, 145, 0.18);
+            transition: all 0.2s ease;
+        }
+
+        .login-after-registration:hover {
+            background: #163f75;
+            transform: translateY(-1px);
+        }
+
+        /* Responsive */
+
+        @media (max-width: 800px) {
+            .register-card {
+                padding: 32px 25px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .registration-heading h2 {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .auth-container {
+                padding: 25px 12px 35px;
+            }
+
+            .register-card {
+                padding: 25px 18px;
+                border-radius: 12px;
+            }
+
+            .registration-heading h2 {
+                font-size: 21px;
+            }
+
+            .section-title {
+                font-size: 15px;
+            }
+
+            .registration-success {
+                padding: 30px 15px;
+            }
+
+            .registration-success h2 {
+                font-size: 23px;
+            }
+
+            .registration-success h3 {
+                font-size: 18px;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-    <!-- HEADER SECTION -->
-        <header class="top-header">
-        <div class="header-left">
-            <!-- You can replace logo.png with your actual logo file later -->
-            <img src="https://lh3.googleusercontent.com/d/1s1s802Y7n5PgAX4dLZ6cZzRhYhN_ofTA" alt="ACTI Logo" class="logo">
-            <div class="school-titles">
-                <h1>Adventist College of Technology, Inc.</h1>
-                <p class="subtitle">(Formerly: Matutum View Christian College)</p>
-                <p class="motto">"An Institution of Faith and Skills Development"</p>
-            </div>
+<header class="top-header">
+    <div class="header-left">
+        <img src="https://lh3.googleusercontent.com/d/1s1s802Y7n5PgAX4dLZ6cZzRhYhN_ofTA" alt="ACTI Logo" class="logo">
+        <div class="school-titles">
+            <h1>Adventist College of Technology, Inc.</h1>
+            <p class="subtitle">(Formerly: Matutum View Christian College)</p>
+            <p class="motto">"An Institution of Faith and Skills Development"</p>
         </div>
-        <div class="header-right">
-            <p>📍 Prk. 4, Brgy. Acmonan, Tupi, South Cotabato</p>
-            <p>🌐 acti-edu.ph</p>
-            <p>🔵 Adventist College of Technology, Inc.</p>
-        </div>
-    </header>
+    </div>
+    <div class="header-right">
+        <p>📍 Prk. 4, Brgy. Acmonan, Tupi, South Cotabato</p>
+        <p>🌐 acti-edu.ph</p>
+        <p>🔵 Adventist College of Technology, Inc.</p>
+    </div>
+</header>
 
-    <!-- TWO COLUMN REGISTRATION CONTAINER -->
-    <main class="auth-container">
-        <div class="auth-card register-card" id="register-card">
-            <h2>STUDENT PORTAL REGISTRATION</h2>
-            <form id="registration-form">
-                
+<main class="auth-container">
+
+    <!-- =========================================================
+         REGISTRATION CARD
+    ========================================================== -->
+
+    <div class="auth-card register-card" id="register-card">
+
+        <div class="registration-heading">
+            <span class="portal-label">ACTI STUDENT PORTAL</span>
+
+            <h2>Create Your Student Account</h2>
+
+            <p>
+                Welcome to the ACTI Student Portal. Please provide the required
+                information below to create your student account and access
+                your academic records.
+            </p>
+        </div>
+
+        <form id="registration-form">
+
+            <!-- =================================================
+                 1. ACCOUNT INFORMATION
+            ================================================== -->
+
+            <div class="form-section">
+
+                <div class="section-header">
+                    <div class="section-number">1</div>
+
+                    <div>
+                        <h3 class="section-title">Account Information</h3>
+                        <p class="section-description">
+                            Information you will use to access your student portal.
+                        </p>
+                    </div>
+                </div>
+
                 <div class="form-grid">
-                    <!-- Column 1 -->
+
                     <div class="form-column">
+
                         <div class="input-group">
                             <label for="reg_email">Email Address</label>
-                            <input type="email" id="reg_email" placeholder="student@gmail.com" required>
+                            <input
+                                type="email"
+                                id="reg_email"
+                                placeholder="student@gmail.com"
+                                required
+                            >
+                            <span class="input-help">
+                                Use an active email address that you can access.
+                            </span>
                         </div>
+
+                        <div class="input-group">
+                            <label for="reg_password">Create Password</label>
+                            <input
+                                type="password"
+                                id="reg_password"
+                                placeholder="Create your password"
+                                required
+                            >
+                        </div>
+
+                    </div>
+
+                    <div class="form-column">
+
+                        <div class="input-group">
+                            <label for="reg_confirm_password">Confirm Password</label>
+                            <input
+                                type="password"
+                                id="reg_confirm_password"
+                                placeholder="Re-enter your password"
+                                required
+                            >
+                        </div>
+
+                        <div class="password-note">
+                            <strong>Password:</strong>
+                            Please create a password that you can remember and
+                            keep your login credentials confidential.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 2. STUDENT INFORMATION
+            ================================================== -->
+
+            <div class="form-section">
+
+                <div class="section-header">
+                    <div class="section-number">2</div>
+
+                    <div>
+                        <h3 class="section-title">Student Information</h3>
+                        <p class="section-description">
+                            Enter your official student and academic information.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-column">
+
                         <div class="input-group">
                             <label for="reg_id_number">ID Number</label>
-                            <input type="text" id="reg_id_number" placeholder="SEM-25-XXXX-XXXX" required>
+                            <input
+                                type="text"
+                                id="reg_id_number"
+                                placeholder="SEM-25-XXXX-XXXX"
+                                required
+                            >
                         </div>
+
                         <div class="input-group">
-                            <label for="reg_name">Full Name (Last Name, FirstName Middle Name)</label>
-                            <input type="text" id="reg_name" placeholder="Dela Cruz, Juan Central" required>
+                            <label for="reg_name">
+                                Full Name (Last Name, First Name Middle Name)
+                            </label>
+                            <input
+                                type="text"
+                                id="reg_name"
+                                placeholder="Dela Cruz, Juan Central"
+                                required
+                            >
                         </div>
+
                         <div class="input-group">
                             <label for="reg_year">Year Level</label>
                             <select id="reg_year" required>
-                                <option value="" disabled selected>Select Year Level</option>
+                                <option value="" disabled selected>
+                                    Select Year Level
+                                </option>
                                 <option value="First Year">First Year</option>
                                 <option value="Second Year">Second Year</option>
                                 <option value="Third Year">Third Year</option>
                                 <option value="Fourth Year">Fourth Year</option>
                             </select>
                         </div>
+
+                    </div>
+
+                    <div class="form-column">
+
                         <div class="input-group">
                             <label for="reg_status">Academic Status</label>
                             <select id="reg_status" required>
-                                <option value="" disabled selected>Select Status</option>
+                                <option value="" disabled selected>
+                                    Select Status
+                                </option>
                                 <option value="Regular">Regular</option>
                                 <option value="Irregular">Irregular</option>
                             </select>
                         </div>
+
                         <div class="input-group">
                             <label for="reg_gender">Gender</label>
                             <select id="reg_gender" required>
-                                <option value="" disabled selected>Select Gender</option>
+                                <option value="" disabled selected>
+                                    Select Gender
+                                </option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
                             </select>
                         </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 3. PERSONAL INFORMATION
+            ================================================== -->
+
+            <div class="form-section">
+
+                <div class="section-header">
+                    <div class="section-number">3</div>
+
+                    <div>
+                        <h3 class="section-title">Personal Information</h3>
+                        <p class="section-description">
+                            Provide your basic personal information.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-column">
+
                         <div class="input-group">
                             <label for="reg_dob">Date of Birth</label>
-                            <input type="date" id="reg_dob" required>
+                            <input
+                                type="date"
+                                id="reg_dob"
+                                required
+                            >
                         </div>
+
                         <div class="input-group">
                             <label for="reg_pob">Place of Birth</label>
-                            <input type="text" id="reg_pob" placeholder="City/Municipality" required>
+                            <input
+                                type="text"
+                                id="reg_pob"
+                                placeholder="City/Municipality"
+                                required
+                            >
                         </div>
-                        <div class="input-group">
-                            <label for="reg_address">Present Address</label>
-                            <input type="text" id="reg_address" placeholder="Barangay, Town, Province" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="reg_religion">Religion</label>
-                            <input type="text" id="reg_religion" placeholder="e.g. Seventh-day Adventist" required>
-                        </div>
-                    </div>
 
-                    <!-- Column 2 -->
-                    <div class="form-column">
                         <div class="input-group">
                             <label for="reg_mobile">Mobile Number</label>
-                            <input type="tel" id="reg_mobile" placeholder="09XXXXXXXXX" required>
+                            <input
+                                type="tel"
+                                id="reg_mobile"
+                                placeholder="09XXXXXXXXX"
+                                required
+                            >
                         </div>
+
+                    </div>
+
+                    <div class="form-column">
+
+                        <div class="input-group">
+                            <label for="reg_address">Present Address</label>
+                            <input
+                                type="text"
+                                id="reg_address"
+                                placeholder="Barangay, Town, Province"
+                                required
+                            >
+                        </div>
+
+                        <div class="input-group">
+                            <label for="reg_religion">Religion</label>
+                            <input
+                                type="text"
+                                id="reg_religion"
+                                placeholder="e.g. Seventh-day Adventist"
+                                required
+                            >
+                        </div>
+
                         <div class="input-group">
                             <label for="reg_ethnicity">Ethnicity</label>
-                            <input type="text" id="reg_ethnicity" placeholder="e.g. B'laan, Ilonggo, Cebuano" required>
+                            <input
+                                type="text"
+                                id="reg_ethnicity"
+                                placeholder="e.g. B'laan, Ilonggo, Cebuano"
+                                required
+                            >
                         </div>
-                        <div class="input-group">
-                            <label for="reg_father">Father's Full Name</label>
-                            <input type="text" id="reg_father" placeholder="Last Name, First Name" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="reg_father_rel">Father's Religion</label>
-                            <input type="text" id="reg_father_rel" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="reg_mother">Mother's Maiden Name</label>
-                            <input type="text" id="reg_mother" placeholder="Maiden Last Name, First Name" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="reg_mother_rel">Mother's Religion</label>
-                            <input type="text" id="reg_mother_rel" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="reg_guardian">Guardian's Name (N/A if none)</label>
-                            <input type="text" id="reg_guardian" value="N/A" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="reg_guardian_contact">Parent/Guardian Contact Number</label>
-                            <input type="tel" id="reg_guardian_contact" placeholder="09XXXXXXXXX" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="reg_password">Create Password</label>
-                            <input type="password" id="reg_password" placeholder="••••" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="reg_confirm_password">Confirm Password</label>
-                            <input type="password" id="reg_confirm_password" placeholder="••••" required>
-                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 4. FAMILY INFORMATION
+            ================================================== -->
+
+            <div class="form-section">
+
+                <div class="section-header">
+                    <div class="section-number">4</div>
+
+                    <div>
+                        <h3 class="section-title">Family Information</h3>
+                        <p class="section-description">
+                            Provide the requested information about your parents
+                            or guardian.
+                        </p>
                     </div>
                 </div>
 
-                <!-- 1x1 Photo ID Upload Section -->
-                <div class="input-group upload-section">
-                    <label for="reg_photo" class="upload-label">
-                        📸 Upload 1x1 Formal Photo ID (JPEG/PNG)
-                    </label>
-                    <input type="file" id="reg_photo" accept="image/*" required>
+                <div class="form-grid">
+
+                    <div class="form-column">
+
+                        <div class="input-group">
+                            <label for="reg_father">Father's Full Name</label>
+                            <input
+                                type="text"
+                                id="reg_father"
+                                placeholder="Last Name, First Name"
+                                required
+                            >
+                        </div>
+
+                        <div class="input-group">
+                            <label for="reg_father_rel">Father's Religion</label>
+                            <input
+                                type="text"
+                                id="reg_father_rel"
+                                required
+                            >
+                        </div>
+
+                        <div class="input-group">
+                            <label for="reg_mother">Mother's Maiden Name</label>
+                            <input
+                                type="text"
+                                id="reg_mother"
+                                placeholder="Maiden Last Name, First Name"
+                                required
+                            >
+                        </div>
+
+                        <div class="input-group">
+                            <label for="reg_mother_rel">Mother's Religion</label>
+                            <input
+                                type="text"
+                                id="reg_mother_rel"
+                                required
+                            >
+                        </div>
+
+                    </div>
+
+                    <div class="form-column">
+
+                        <div class="input-group">
+                            <label for="reg_guardian">
+                                Guardian's Name (N/A if none)
+                            </label>
+                            <input
+                                type="text"
+                                id="reg_guardian"
+                                value="N/A"
+                                required
+                            >
+                        </div>
+
+                        <div class="input-group">
+                            <label for="reg_guardian_contact">
+                                Parent/Guardian Contact Number
+                            </label>
+                            <input
+                                type="tel"
+                                id="reg_guardian_contact"
+                                placeholder="09XXXXXXXXX"
+                                required
+                            >
+                        </div>
+
+                    </div>
+
                 </div>
 
-                <button type="submit" class="primary-btn">Register & Create Account</button>
-            </form>
-            <p class="toggle-text">
-                Already registered? <a href="/" class="toggle-link" style="text-decoration: none;">Login here</a>
+            </div>
+
+
+            <!-- =================================================
+                 5. PHOTO IDENTIFICATION
+            ================================================== -->
+
+            <div class="form-section">
+
+                <div class="section-header">
+                    <div class="section-number">5</div>
+
+                    <div>
+                        <h3 class="section-title">Photo Identification</h3>
+                        <p class="section-description">
+                            Upload your formal identification photo.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="photo-upload-box">
+
+                    <div class="photo-upload-title">
+                        <div class="photo-icon">📸</div>
+                        <span>1×1 Formal Photo ID</span>
+                    </div>
+
+                    <p class="photo-upload-description">
+                        Please upload a clear and recent formal photo in
+                        JPEG or PNG format.
+                    </p>
+
+                    <input
+                        type="file"
+                        id="reg_photo"
+                        accept="image/*"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 SUBMIT
+            ================================================== -->
+
+            <div class="registration-submit">
+
+                <button
+                    type="submit"
+                    class="primary-btn"
+                >
+                    Register & Create Account
+                </button>
+
+                <p class="toggle-text">
+                    Already registered?
+                    <a href="/" class="toggle-link" style="text-decoration: none;">
+                        Login here
+                    </a>
+                </p>
+
+            </div>
+
+        </form>
+
+
+        <!-- =====================================================
+             SUCCESS MESSAGE
+        ====================================================== -->
+
+        <div
+            class="registration-success"
+            id="registration-success"
+        >
+
+            <div class="success-icon">
+                ✓
+            </div>
+
+            <h2>Account Created Successfully</h2>
+
+            <h3>Welcome to the BSED Mathematics Program!</h3>
+
+            <p>
+                Your ACTI Student Portal account has been successfully created.
+                You may now sign in using your registered email address and
+                password to access your student portal.
             </p>
-        </div>
-    </main>
 
-    <!-- FOOTER SECTION -->
-    <footer>
-        <div class="footer-cards">
-            <div class="card">
-                <h3>VISION</h3>
-                <p>Producing competent graduates in service to God and humanity.</p>
+            <div class="success-note">
+                <strong>Your account is ready.</strong><br>
+                Please keep your login credentials secure and do not share
+                your password with anyone.
             </div>
-            <div class="card">
-                <h3>MISSION</h3>
-                <p>Providing Christ-Centered, holistic Adventist Education.</p>
-            </div>
-            <div class="card">
-                <h3>PHILOSOPHY</h3>
-                <p>God is the true source of Adventist Education for life and eternity.</p>
-            </div>
-            <div class="card">
-                <h3>GOAL</h3>
-                <p>Ensuring quality teacher training and skills development.</p>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p class="glory-text">To God be all the Glory!</p>
-        </div>
-    </footer>
 
-    <!-- LINK THE REGISTRATION SCRIPT -->
-    <script src="script.js"></script>
+            <a
+                href="/"
+                class="login-after-registration"
+            >
+                Continue to Sign In
+            </a>
+
+        </div>
+
+    </div>
+
+</main>
+
+<footer>
+    <div class="footer-cards">
+        <div class="card">
+            <h3>VISION</h3>
+            <p>Producing competent graduates in service to God and humanity.</p>
+        </div>
+        <div class="card">
+            <h3>MISSION</h3>
+            <p>Providing Christ-Centered, holistic Adventist Education.</p>
+        </div>
+        <div class="card">
+            <h3>PHILOSOPHY</h3>
+            <p>God is the true source of Adventist Education for life and eternity.</p>
+        </div>
+        <div class="card">
+            <h3>GOAL</h3>
+            <p>Ensuring quality teacher training and skills development.</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p class="glory-text">To God be all the Glory!</p>
+    </div>
+</footer>
+
+<script src="script.js"></script>
+
 </body>
 </html>

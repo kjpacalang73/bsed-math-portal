@@ -731,29 +731,45 @@
         }
 
         /* =========================================
-           TOAST
+           TOAST NOTIFICATION
         ========================================= */
 
         .admin-toast {
             position: fixed;
             right: 25px;
             bottom: 25px;
-            background: #002244;
-            color: white;
-            padding: 14px 18px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            min-width: 300px;
+            max-width: 420px;
+            background: #ffffff;
+            color: #1e293b;
+            padding: 16px 18px;
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+            border-left: 5px solid #21753a;
             font-size: 12px;
             z-index: 99999;
             opacity: 0;
-            transform: translateY(15px);
+            transform: translateY(20px);
             pointer-events: none;
-            transition: 0.3s ease;
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
         .admin-toast.show {
             opacity: 1;
             transform: translateY(0);
+        }
+
+        .admin-toast-title {
+            font-size: 13px;
+            font-weight: 900;
+            color: #002244;
+            margin-bottom: 3px;
+        }
+
+        .admin-toast-message {
+            font-size: 11px;
+            color: #64748b;
+            line-height: 1.5;
         }
 
         /* =========================================
@@ -890,6 +906,14 @@
             .view-student-btn {
                 padding: 7px 9px;
                 font-size: 9px;
+            }
+
+            .admin-toast {
+                left: 15px;
+                right: 15px;
+                bottom: 15px;
+                min-width: auto;
+                max-width: none;
             }
         }
 
@@ -1129,7 +1153,6 @@
         ====================================== -->
 
         <section class="analytics-grid">
-
 
             <!-- YEAR LEVEL -->
 
@@ -1471,28 +1494,126 @@
 </div>
 
 
-<!-- TOAST -->
+<!-- =========================================
+     ADMIN TOAST
+========================================== -->
 
 <div
     id="adminToast"
     class="admin-toast"
-></div>
+    role="status"
+    aria-live="polite"
+>
+
+    <div
+        class="admin-toast-title"
+        id="adminToastTitle"
+    >
+        Login Successful
+    </div>
+
+    <div
+        class="admin-toast-message"
+        id="adminToastMessage"
+    >
+        Welcome to the administrator dashboard.
+    </div>
+
+</div>
 
 
-<!-- ADMIN SCRIPT -->
+<!-- =========================================
+     ADMIN SCRIPT
+========================================== -->
 
 <script src="admin-script.js"></script>
 
 
-<!-- LOGOUT -->
+<!-- =========================================
+     ADMIN NOTIFICATION + LOGOUT
+========================================== -->
 
 <script>
+
+    /* =========================================
+       ADMIN TOAST FUNCTION
+    ========================================== */
+
+    function showAdminToast(title, message, duration = 4000) {
+
+        const toast = document.getElementById('adminToast');
+        const toastTitle = document.getElementById('adminToastTitle');
+        const toastMessage = document.getElementById('adminToastMessage');
+
+        if (!toast || !toastTitle || !toastMessage) {
+            return;
+        }
+
+        toastTitle.textContent = title;
+        toastMessage.textContent = message;
+
+        toast.classList.add('show');
+
+        setTimeout(function () {
+            toast.classList.remove('show');
+        }, duration);
+    }
+
+
+    /* =========================================
+       ADMIN LOGIN SUCCESS NOTIFICATION
+    ========================================== */
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        /*
+         * The login page redirects to admin.html after
+         * successful administrator authentication.
+         *
+         * The referrer lets us determine that the user
+         * actually came from the login page.
+         */
+
+        const referrer = document.referrer || '';
+
+        const cameFromLoginPage =
+            referrer.includes('index.html') ||
+            referrer.endsWith('/');
+
+        const alreadyShown =
+            sessionStorage.getItem('adminLoginNotificationShown');
+
+        if (cameFromLoginPage && alreadyShown !== 'true') {
+
+            sessionStorage.setItem(
+                'adminLoginNotificationShown',
+                'true'
+            );
+
+            setTimeout(function () {
+
+                showAdminToast(
+                    'Login Successful',
+                    'Welcome, Administrator. You have successfully entered the management portal.',
+                    4500
+                );
+
+            }, 500);
+
+        }
+
+    });
+
+
+    /* =========================================
+       LOGOUT
+    ========================================== */
 
     const logoutButton = document.getElementById('logoutBtn');
 
     if (logoutButton) {
 
-        logoutButton.addEventListener('click', function () {
+        logoutButton.addEventListener('click', async function () {
 
             const confirmed = confirm(
                 "Are you sure you want to securely log out of the administrator account?"
@@ -1502,9 +1623,26 @@
                 return;
             }
 
-            sessionStorage.clear();
+            try {
 
-            window.location.href = 'index.html';
+                await fetch('/api/admin/logout', {
+                    method: 'POST'
+                });
+
+            } catch (error) {
+
+                console.error(
+                    'Admin logout error:',
+                    error
+                );
+
+            }
+
+            sessionStorage.removeItem(
+                'adminLoginNotificationShown'
+            );
+
+            window.location.href = '/';
 
         });
 
