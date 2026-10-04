@@ -1,154 +1,1927 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Edit Grades</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1s1s802Y7n5PgAX4dLZ6cZzRhYhN_ofTA">
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Edit Student Grades | BSED Mathematics</title>
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="https://lh3.googleusercontent.com/d/1s1s802Y7n5PgAX4dLZ6cZzRhYhN_ofTA"
+    >
+
     <style>
-        body { margin: 0; padding: 0; min-height: 100vh; background: url('https://lh3.googleusercontent.com/d/1mE3LrHYGmFZ0jgP9k4giyPypXAKnMjLl') no-repeat center center fixed; background-size: cover; font-family: sans-serif; }
-        body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: -1; }
 
-        /* Profile Card Styling */
-        .student-header { background: white; padding: 20px; margin: 20px auto; width: 95%; border-radius: 10px; display: flex; align-items: center; gap: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-        .student-img { width: 100px; height: 100px; border-radius: 10px; border: 2px solid #002366; object-fit: cover; }
-        .info-container h1 { margin: 0; color: #002366; font-size: 24px; }
-        .badge-container { margin-top: 10px; }
-        .badge { padding: 5px 12px; border-radius: 15px; font-size: 0.8em; font-weight: bold; border: 1px solid #002366; color: #002366; margin-right: 5px; }
+        /* =====================================================
+           GENERAL PAGE
+        ===================================================== */
 
-        /* Grades Table */
-        .grades-table { background: white; width: 95%; margin: 0 auto 20px auto; border-collapse: collapse; border-radius: 0 0 10px 10px; overflow: hidden; }
-        .grades-table th { background: #002366; color: white; padding: 15px; text-align: left; }
-        .grades-table td { padding: 12px; border-bottom: 1px solid #ddd; }
+        * {
+            box-sizing: border-box;
+        }
 
-        .grade-input { width: 80px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        body {
+
+            margin: 0;
+
+            min-height: 100vh;
+
+            font-family:
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+            background:
+                url("https://lh3.googleusercontent.com/d/1mE3LrHYGmFZ0jgP9k4giyPypXAKnMjLl")
+                no-repeat
+                center
+                center
+                fixed;
+
+            background-size: cover;
+
+            color: #333;
+
+        }
+
+
+        body::before {
+
+            content: "";
+
+            position: fixed;
+
+            inset: 0;
+
+            background:
+                rgba(0, 0, 0, 0.70);
+
+            z-index: -1;
+
+        }
+
+
+        /* =====================================================
+           MAIN CONTAINER
+        ===================================================== */
+
+        .page-container {
+
+            width: 95%;
+
+            max-width: 1200px;
+
+            margin:
+                35px auto
+                60px auto;
+
+        }
+
+
+        /* =====================================================
+           PAGE TITLE
+        ===================================================== */
+
+        .page-heading {
+
+            color: white;
+
+            margin-bottom: 18px;
+
+        }
+
+
+        .page-heading h1 {
+
+            margin: 0;
+
+            font-size: 28px;
+
+            font-weight: 600;
+
+            letter-spacing: 0.2px;
+
+        }
+
+
+        .page-heading p {
+
+            margin:
+                5px 0 0 0;
+
+            color: #d9d9d9;
+
+            font-size: 14px;
+
+        }
+
+
+        /* =====================================================
+           STUDENT PROFILE CARD
+        ===================================================== */
+
+        .student-header {
+
+            background:
+                rgba(255, 255, 255, 0.98);
+
+            width: 100%;
+
+            padding: 22px;
+
+            border-radius: 12px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 22px;
+
+            box-shadow:
+                0 8px 25px
+                rgba(0, 0, 0, 0.22);
+
+            border:
+                1px solid
+                rgba(255,255,255,0.8);
+
+        }
+
+
+        .student-img {
+
+            width: 105px;
+
+            height: 105px;
+
+            border-radius: 10px;
+
+            border:
+                3px solid
+                #002366;
+
+            object-fit: cover;
+
+            background: #f1f1f1;
+
+            flex-shrink: 0;
+
+        }
+
+
+        .info-container {
+
+            min-width: 0;
+
+            flex: 1;
+
+        }
+
+
+        .info-container h2 {
+
+            margin: 0;
+
+            color: #002366;
+
+            font-size: 25px;
+
+            font-weight: 700;
+
+            word-break: break-word;
+
+        }
+
+
+        .student-id {
+
+            margin:
+                6px 0 0 0;
+
+            color: #555;
+
+            font-size: 14px;
+
+        }
+
+
+        .student-id strong {
+
+            color: #222;
+
+        }
+
+
+        .badge-container {
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 8px;
+
+            margin-top: 12px;
+
+        }
+
+
+        .badge {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            padding:
+                6px 12px;
+
+            border-radius: 20px;
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+            border:
+                1px solid
+                #002366;
+
+            color: #002366;
+
+            background:
+                #f5f8fc;
+
+        }
+
+
+        /* =====================================================
+           ACTION BAR
+        ===================================================== */
+
+        .action-bar {
+
+            position: sticky;
+
+            top: 0;
+
+            z-index: 100;
+
+            margin-top: 16px;
+
+            margin-bottom: 18px;
+
+            background:
+                rgba(255,255,255,0.97);
+
+            backdrop-filter:
+                blur(10px);
+
+            -webkit-backdrop-filter:
+                blur(10px);
+
+            padding:
+                12px 15px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 5px 18px
+                rgba(0,0,0,0.20);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 12px;
+
+        }
+
+
+        .action-label {
+
+            color: #555;
+
+            font-size: 13px;
+
+            font-weight: 500;
+
+        }
+
+
+        .action-buttons {
+
+            display: flex;
+
+            gap: 10px;
+
+        }
+
+
+        .action-button {
+
+            border: none;
+
+            border-radius: 7px;
+
+            padding:
+                10px 17px;
+
+            font-family:
+                inherit;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition:
+                all 0.2s ease;
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 7px;
+
+        }
+
+
+        .back-button {
+
+            background: #6c757d;
+
+            color: white;
+
+        }
+
+
+        .back-button:hover {
+
+            background: #5a6268;
+
+            transform:
+                translateY(-1px);
+
+        }
+
+
+        .save-button {
+
+            background: #002366;
+
+            color: white;
+
+            min-width: 145px;
+
+        }
+
+
+        .save-button:hover {
+
+            background: #001a4d;
+
+            transform:
+                translateY(-1px);
+
+        }
+
+
+        .save-button:disabled {
+
+            opacity: 0.65;
+
+            cursor: not-allowed;
+
+            transform: none;
+
+        }
+
+
+        /* =====================================================
+           GRADES SECTION
+        ===================================================== */
+
+        .grades-card {
+
+            background:
+                rgba(255,255,255,0.98);
+
+            border-radius: 12px;
+
+            overflow: hidden;
+
+            box-shadow:
+                0 8px 25px
+                rgba(0,0,0,0.22);
+
+        }
+
+
+        .grades-header {
+
+            padding:
+                18px 20px;
+
+            border-bottom:
+                1px solid #e5e5e5;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 15px;
+
+        }
+
+
+        .grades-header h2 {
+
+            margin: 0;
+
+            color: #002366;
+
+            font-size: 19px;
+
+        }
+
+
+        .grades-header p {
+
+            margin:
+                4px 0 0 0;
+
+            color: #777;
+
+            font-size: 13px;
+
+        }
+
+
+        .grades-count {
+
+            color: #002366;
+
+            background:
+                #eef3f9;
+
+            border-radius: 20px;
+
+            padding:
+                6px 11px;
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+            white-space: nowrap;
+
+        }
+
+
+        /* =====================================================
+           TABLE
+        ===================================================== */
+
+        .table-wrapper {
+
+            width: 100%;
+
+            overflow-x: auto;
+
+        }
+
+
+        .grades-table {
+
+            background: white;
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            min-width: 700px;
+
+        }
+
+
+        .grades-table th {
+
+            background: #002366;
+
+            color: white;
+
+            padding:
+                14px 16px;
+
+            text-align: left;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            white-space: nowrap;
+
+        }
+
+
+        .grades-table td {
+
+            padding:
+                12px 16px;
+
+            border-bottom:
+                1px solid #e5e5e5;
+
+            font-size: 14px;
+
+            color: #333;
+
+        }
+
+
+        .grades-table tbody tr {
+
+            transition:
+                background 0.15s ease;
+
+        }
+
+
+        .grades-table tbody tr:hover {
+
+            background:
+                #f7f9fc;
+
+        }
+
+
+        .grades-table tbody tr:last-child td {
+
+            border-bottom: none;
+
+        }
+
+
+        .course-code {
+
+            font-weight: 700;
+
+            color: #002366;
+
+            white-space: nowrap;
+
+        }
+
+
+        .course-title {
+
+            color: #444;
+
+        }
+
+
+        .units-cell {
+
+            text-align: center;
+
+            font-weight: 600;
+
+        }
+
+
+        .grade-cell {
+
+            width: 130px;
+
+        }
+
+
+        .grade-input {
+
+            width: 90px;
+
+            padding:
+                8px 9px;
+
+            border:
+                1px solid #c9cfd6;
+
+            border-radius: 6px;
+
+            font-family:
+                inherit;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            text-align: center;
+
+            color: #222;
+
+            background: white;
+
+            transition:
+                border 0.2s ease,
+                box-shadow 0.2s ease;
+
+        }
+
+
+        .grade-input:focus {
+
+            outline: none;
+
+            border-color:
+                #002366;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(0,35,102,0.10);
+
+        }
+
+
+        /* =====================================================
+           LOADING / EMPTY STATES
+        ===================================================== */
+
+        .table-message {
+
+            text-align: center;
+
+            padding:
+                45px 20px;
+
+            color: #777;
+
+        }
+
+
+        .loading-spinner {
+
+            width: 30px;
+
+            height: 30px;
+
+            border:
+                3px solid #e1e5ea;
+
+            border-top-color:
+                #002366;
+
+            border-radius: 50%;
+
+            animation:
+                spin 0.8s linear infinite;
+
+            margin:
+                0 auto 12px auto;
+
+        }
+
+
+        @keyframes spin {
+
+            to {
+                transform:
+                    rotate(360deg);
+            }
+
+        }
+
+
+        /* =====================================================
+           CUSTOM NOTIFICATION
+        ===================================================== */
+
+        .notification-container {
+
+            position: fixed;
+
+            top: 22px;
+
+            right: 22px;
+
+            width:
+                min(390px, calc(100vw - 44px));
+
+            z-index: 9999;
+
+            pointer-events: none;
+
+        }
+
+
+        .notification {
+
+            background: white;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 10px 35px
+                rgba(0,0,0,0.25);
+
+            border-left:
+                5px solid #198754;
+
+            padding:
+                15px 15px 15px 14px;
+
+            display: flex;
+
+            align-items: flex-start;
+
+            gap: 12px;
+
+            margin-bottom: 10px;
+
+            pointer-events: auto;
+
+            transform:
+                translateX(120%);
+
+            opacity: 0;
+
+            transition:
+                transform 0.35s ease,
+                opacity 0.35s ease;
+
+        }
+
+
+        .notification.show {
+
+            transform:
+                translateX(0);
+
+            opacity: 1;
+
+        }
+
+
+        .notification.error {
+
+            border-left-color:
+                #dc3545;
+
+        }
+
+
+        .notification-icon {
+
+            width: 34px;
+
+            height: 34px;
+
+            border-radius: 50%;
+
+            background:
+                #e8f7ef;
+
+            color:
+                #198754;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+        }
+
+
+        .notification.error
+        .notification-icon {
+
+            background:
+                #fdecec;
+
+            color:
+                #dc3545;
+
+        }
+
+
+        .notification-content {
+
+            flex: 1;
+
+            min-width: 0;
+
+        }
+
+
+        .notification-title {
+
+            color: #222;
+
+            font-size: 14px;
+
+            font-weight: 700;
+
+            margin-bottom: 3px;
+
+        }
+
+
+        .notification-message {
+
+            color: #666;
+
+            font-size: 12px;
+
+            line-height: 1.45;
+
+        }
+
+
+        .notification-close {
+
+            border: none;
+
+            background: transparent;
+
+            color: #999;
+
+            cursor: pointer;
+
+            font-size: 18px;
+
+            line-height: 1;
+
+            padding: 2px;
+
+        }
+
+
+        .notification-close:hover {
+
+            color: #333;
+
+        }
+
+
+        /* =====================================================
+           RESPONSIVE DESIGN
+        ===================================================== */
+
+        @media (max-width: 700px) {
+
+            .page-container {
+
+                width: 94%;
+
+                margin-top: 20px;
+
+            }
+
+
+            .page-heading h1 {
+
+                font-size: 22px;
+
+            }
+
+
+            .student-header {
+
+                padding: 16px;
+
+                gap: 14px;
+
+                align-items: flex-start;
+
+            }
+
+
+            .student-img {
+
+                width: 78px;
+
+                height: 78px;
+
+            }
+
+
+            .info-container h2 {
+
+                font-size: 19px;
+
+            }
+
+
+            .action-bar {
+
+                flex-direction: column;
+
+                align-items: stretch;
+
+            }
+
+
+            .action-label {
+
+                display: none;
+
+            }
+
+
+            .action-buttons {
+
+                width: 100%;
+
+            }
+
+
+            .action-button {
+
+                flex: 1;
+
+            }
+
+
+            .grades-header {
+
+                align-items: flex-start;
+
+                flex-direction: column;
+
+            }
+
+        }
+
+
+        @media (max-width: 450px) {
+
+            .student-header {
+
+                flex-direction: column;
+
+                align-items: center;
+
+                text-align: center;
+
+            }
+
+
+            .badge-container {
+
+                justify-content: center;
+
+            }
+
+
+            .student-id {
+
+                font-size: 13px;
+
+            }
+
+        }
+
     </style>
+
 </head>
+
+
 <body>
 
-    <!-- Header Box -->
-    <div class="student-header">
-        <img id="studentPhoto" src="https://placehold.co/150?text=Loading..." alt="Student" class="student-img onclick="openImageMagnifier()">
-        <div class="info-container">
-            <h1 id="studentName">Loading Name...</h1>
-            <p>Student ID: <span id="studentIdDisplay">Loading...</span></p>
-            <div class="badge-container">
-                <span class="badge" id="studentYear">YEAR</span>
-                <span class="badge" id="studentStatus">STATUS</span>
-            </div>
+
+    <div
+        id="notificationContainer"
+        class="notification-container"
+    ></div>
+
+
+    <main class="page-container">
+
+
+        <!-- =================================================
+             PAGE HEADING
+        ================================================== -->
+
+        <div class="page-heading">
+
+            <h1>
+                Edit Academic Records
+            </h1>
+
+            <p>
+                Manage and update the student's academic grades.
+            </p>
+
         </div>
-    </div>
 
-    <table class="grades-table">
-        <thead>
-            <tr><th>Code</th><th>Descriptive Title</th><th>Units</th><th>Grade</th></tr>
-        </thead>
-        <tbody id="gradesBody"></tbody>
-    </table>
 
-    <!-- Navigation and Action Buttons -->
-<div style="text-align: center; margin: 20px;">
-    <button onclick="window.location.href='/admin.html'" 
-            style="padding: 10px 20px; background-color: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
-        Back to Admin
-    </button>
-    
-    <button onclick="saveGrades()" 
-            style="padding: 10px 30px; background-color: #002366; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
-        Save Grades
-    </button>
-</div>
+        <!-- =================================================
+             STUDENT PROFILE
+        ================================================== -->
+
+        <section class="student-header">
+
+            <img
+                id="studentPhoto"
+                src="https://placehold.co/150?text=Loading"
+                alt="Student"
+                class="student-img"
+            >
+
+
+            <div class="info-container">
+
+                <h2 id="studentName">
+                    Loading Name...
+                </h2>
+
+
+                <p class="student-id">
+
+                    Student ID:
+                    <strong id="studentIdDisplay">
+                        Loading...
+                    </strong>
+
+                </p>
+
+
+                <div class="badge-container">
+
+                    <span
+                        class="badge"
+                        id="studentYear"
+                    >
+                        YEAR
+                    </span>
+
+
+                    <span
+                        class="badge"
+                        id="studentStatus"
+                    >
+                        STATUS
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             ACTION BAR
+        ================================================== -->
+
+        <div class="action-bar">
+
+            <div class="action-label">
+
+                Academic record actions
+
+            </div>
+
+
+            <div class="action-buttons">
+
+                <button
+                    type="button"
+                    class="action-button back-button"
+                    onclick="goBackToAdmin()"
+                >
+
+                    ← Back to Admin
+
+                </button>
+
+
+                <button
+                    type="button"
+                    id="saveGradesButton"
+                    class="action-button save-button"
+                    onclick="saveGrades()"
+                >
+
+                    <span id="saveButtonIcon">
+                        💾
+                    </span>
+
+                    <span id="saveButtonText">
+                        Save Grades
+                    </span>
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             GRADES CARD
+        ================================================== -->
+
+        <section class="grades-card">
+
+
+            <div class="grades-header">
+
+                <div>
+
+                    <h2>
+                        Academic Grades
+                    </h2>
+
+                    <p>
+                        Enter or update the student's grades below.
+                    </p>
+
+                </div>
+
+
+                <div
+                    class="grades-count"
+                    id="gradesCount"
+                >
+                    Loading...
+                </div>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table class="grades-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Course Code
+                            </th>
+
+                            <th>
+                                Descriptive Title
+                            </th>
+
+                            <th>
+                                Units
+                            </th>
+
+                            <th>
+                                Grade
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="gradesBody">
+
+                        <tr>
+
+                            <td
+                                colspan="4"
+                                class="table-message"
+                            >
+
+                                <div
+                                    class="loading-spinner"
+                                ></div>
+
+                                Loading academic records...
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
 
     <script>
-        const params = new URLSearchParams(window.location.search);
-        const studentId = params.get('id');
 
-       // Add this to your <script> section
-async function loadStudentProfile() {
-    if (!studentId) return;
+        /* =====================================================
+           GET STUDENT ID FROM URL
+        ===================================================== */
 
-    try {
-        // 1. Fetch Profile
-        const profileResponse = await fetch(`/api/profile/${encodeURIComponent(studentId)}`);
-        const profileData = await profileResponse.json();
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
 
-        if (profileData.success && profileData.profile) {
-            const student = profileData.profile;
-            document.getElementById('studentName').innerText = student.name || 'N/A';
-            document.getElementById('studentIdDisplay').innerText = student.student_id || 'N/A';
-            document.getElementById('studentYear').innerText = student.year_level || 'N/A';
-            document.getElementById('studentStatus').innerText = student.academic_status || 'N/A';
-            // In your loadStudentProfile function, ensure this check exists:
-if (student.photo_url) {
-    document.getElementById('studentPhoto').src = student.photo_url;
-} else {
-    // Optional: set a default image if none is found
-    document.getElementById('studentPhoto').src = 'https://via.placeholder.com/100';
-}
+        const studentId =
+            params.get('id');
+
+
+        /* =====================================================
+           BACK TO ADMIN
+        ===================================================== */
+
+        function goBackToAdmin() {
+
+            window.location.href =
+                '/admin.html';
+
         }
 
-        // 2. Fetch Curriculum + Grades
-        const curriculumResponse = await fetch(`/api/get-curriculum-with-grades/${encodeURIComponent(studentId)}`);
-        const curriculumData = await curriculumResponse.json();
 
-        if (curriculumData.success) {
-            const tbody = document.getElementById('gradesBody');
-            tbody.innerHTML = ''; // Clear current
+        /* =====================================================
+           NOTIFICATION SYSTEM
+        ===================================================== */
 
-            curriculumData.data.forEach(item => {
-                const row = `<tr>
-                    <td>${item.course_code}</td>
-                    <td>${item.descriptive_title}</td>
-                    <td>${item.units}</td>
-                    <td>
-                        <input type="text" class="grade-input" 
-                               data-code="${item.course_code}" 
-                               data-title="${item.descriptive_title}"
-                               data-units="${item.units}"
-                               value="${item.grade || ''}" 
-                               placeholder="Enter Grade">
-                    </td>
-                </tr>`;
-                tbody.innerHTML += row;
+        function showNotification(
+            title,
+            message,
+            type = 'success'
+        ) {
+
+            const container =
+                document.getElementById(
+                    'notificationContainer'
+                );
+
+
+            const notification =
+                document.createElement('div');
+
+
+            notification.className =
+                `notification ${type}`;
+
+
+            const icon =
+                type === 'error'
+                    ? '!'
+                    : '✓';
+
+
+            notification.innerHTML = `
+
+                <div class="notification-icon">
+                    ${icon}
+                </div>
+
+                <div class="notification-content">
+
+                    <div class="notification-title">
+                        ${title}
+                    </div>
+
+                    <div class="notification-message">
+                        ${message}
+                    </div>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="notification-close"
+                    aria-label="Close notification"
+                >
+                    ×
+                </button>
+
+            `;
+
+
+            container.appendChild(
+                notification
+            );
+
+
+            const closeButton =
+                notification.querySelector(
+                    '.notification-close'
+                );
+
+
+            closeButton.addEventListener(
+                'click',
+                () => {
+
+                    removeNotification(
+                        notification
+                    );
+
+                }
+            );
+
+
+            requestAnimationFrame(() => {
+
+                notification.classList.add(
+                    'show'
+                );
+
             });
+
+
+            setTimeout(() => {
+
+                removeNotification(
+                    notification
+                );
+
+            }, 4500);
+
         }
-    } catch (error) {
-        console.error("Loading Error:", error);
-    }
-}
 
-async function saveGrades() {
-    const inputs = document.querySelectorAll('.grade-input');
-    const records = [];
 
-    inputs.forEach(input => {
-        records.push({
-            student_id: studentId, // Ensure 'studentId' is defined in your script scope
-            course_code: input.getAttribute('data-code'),
-            descriptive_title: input.getAttribute('data-title'),
-            units: input.getAttribute('data-units'),
-            grade: input.value
-        });
-    });
+        function removeNotification(
+            notification
+        ) {
 
-    try {
-        const response = await fetch('/api/save-grades', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ records })
-        });
-        
-        const result = await response.json();
-        if (result.success) {
-            alert('Grades saved successfully!');
-        } else {
-            alert('Error saving grades: ' + result.message);
+            if (
+                !notification ||
+                !notification.isConnected
+            ) {
+
+                return;
+
+            }
+
+
+            notification.classList.remove(
+                'show'
+            );
+
+
+            setTimeout(() => {
+
+                if (
+                    notification.isConnected
+                ) {
+
+                    notification.remove();
+
+                }
+
+            }, 350);
+
         }
-    } catch (error) {
-        console.error("Save Error:", error);
-    }
-}
+
+
+        /* =====================================================
+           LOAD STUDENT PROFILE + GRADES
+        ===================================================== */
+
+        async function loadStudentProfile() {
+
+            if (!studentId) {
+
+                showNotification(
+                    'Student Not Found',
+                    'No student ID was provided in the page URL.',
+                    'error'
+                );
+
+                return;
+
+            }
+
+
+            try {
+
+                /* ---------------------------------------------
+                   1. LOAD STUDENT PROFILE
+                --------------------------------------------- */
+
+                const profileResponse =
+                    await fetch(
+                        `/api/profile/${encodeURIComponent(studentId)}`
+                    );
+
+
+                const profileData =
+                    await profileResponse.json();
+
+
+                if (
+                    !profileResponse.ok ||
+                    !profileData.success ||
+                    !profileData.profile
+                ) {
+
+                    throw new Error(
+                        profileData.message ||
+                        'Unable to load student profile.'
+                    );
+
+                }
+
+
+                const student =
+                    profileData.profile;
+
+
+                document.getElementById(
+                    'studentName'
+                ).innerText =
+                    student.name || 'N/A';
+
+
+                document.getElementById(
+                    'studentIdDisplay'
+                ).innerText =
+                    student.student_id || 'N/A';
+
+
+                document.getElementById(
+                    'studentYear'
+                ).innerText =
+                    student.year_level || 'N/A';
+
+
+                document.getElementById(
+                    'studentStatus'
+                ).innerText =
+                    student.academic_status || 'N/A';
+
+
+                if (
+                    student.photo_url
+                ) {
+
+                    document.getElementById(
+                        'studentPhoto'
+                    ).src =
+                        student.photo_url;
+
+                } else {
+
+                    document.getElementById(
+                        'studentPhoto'
+                    ).src =
+                        'https://placehold.co/150?text=No+Photo';
+
+                }
+
+
+                /* ---------------------------------------------
+                   2. LOAD CURRICULUM + GRADES
+                --------------------------------------------- */
+
+                const curriculumResponse =
+                    await fetch(
+                        `/api/get-curriculum-with-grades/${encodeURIComponent(studentId)}`
+                    );
+
+
+                const curriculumData =
+                    await curriculumResponse.json();
+
+
+                if (
+                    !curriculumResponse.ok ||
+                    !curriculumData.success
+                ) {
+
+                    throw new Error(
+                        curriculumData.message ||
+                        'Unable to load academic records.'
+                    );
+
+                }
+
+
+                const tbody =
+                    document.getElementById(
+                        'gradesBody'
+                    );
+
+
+                tbody.innerHTML = '';
+
+
+                const records =
+                    Array.isArray(
+                        curriculumData.data
+                    )
+                        ? curriculumData.data
+                        : [];
+
+
+                document.getElementById(
+                    'gradesCount'
+                ).innerText =
+                    `${records.length} Subjects`;
+
+
+                if (
+                    records.length === 0
+                ) {
+
+                    tbody.innerHTML = `
+
+                        <tr>
+
+                            <td
+                                colspan="4"
+                                class="table-message"
+                            >
+
+                                No curriculum subjects
+                                were found for this student.
+
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                    return;
+
+                }
+
+
+                records.forEach(item => {
+
+                    const row =
+                        document.createElement(
+                            'tr'
+                        );
+
+
+                    row.innerHTML = `
+
+                        <td class="course-code">
+                            ${escapeHtml(
+                                item.course_code || ''
+                            )}
+                        </td>
+
+                        <td class="course-title">
+                            ${escapeHtml(
+                                item.descriptive_title || ''
+                            )}
+                        </td>
+
+                        <td class="units-cell">
+                            ${escapeHtml(
+                                item.units ?? ''
+                            )}
+                        </td>
+
+                        <td class="grade-cell">
+
+                            <input
+                                type="text"
+                                class="grade-input"
+                                data-code="${escapeHtml(
+                                    item.course_code || ''
+                                )}"
+                                data-title="${escapeHtml(
+                                    item.descriptive_title || ''
+                                )}"
+                                data-units="${escapeHtml(
+                                    item.units ?? ''
+                                )}"
+                                value="${escapeHtml(
+                                    item.grade ?? ''
+                                )}"
+                                placeholder="Grade"
+                            >
+
+                        </td>
+
+                    `;
+
+
+                    tbody.appendChild(
+                        row
+                    );
+
+                });
+
+
+            } catch (error) {
+
+                console.error(
+                    'Loading Error:',
+                    error
+                );
+
+
+                document.getElementById(
+                    'gradesBody'
+                ).innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="4"
+                            class="table-message"
+                        >
+
+                            Unable to load academic records.
+
+                            <br><br>
+
+                            Please try refreshing the page.
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+
+                document.getElementById(
+                    'gradesCount'
+                ).innerText =
+                    'Unable to load';
+
+
+                showNotification(
+                    'Unable to Load Records',
+                    error.message ||
+                    'Something went wrong while loading the student records.',
+                    'error'
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           SAVE GRADES
+        ===================================================== */
+
+        async function saveGrades() {
+
+            const saveButton =
+                document.getElementById(
+                    'saveGradesButton'
+                );
+
+
+            const saveButtonIcon =
+                document.getElementById(
+                    'saveButtonIcon'
+                );
+
+
+            const saveButtonText =
+                document.getElementById(
+                    'saveButtonText'
+                );
+
+
+            const inputs =
+                document.querySelectorAll(
+                    '.grade-input'
+                );
+
+
+            if (
+                !studentId
+            ) {
+
+                showNotification(
+                    'Unable to Save',
+                    'No student ID was found.',
+                    'error'
+                );
+
+                return;
+
+            }
+
+
+            if (
+                inputs.length === 0
+            ) {
+
+                showNotification(
+                    'Nothing to Save',
+                    'There are no grade records available for this student.',
+                    'error'
+                );
+
+                return;
+
+            }
+
+
+            const records = [];
+
+
+            inputs.forEach(input => {
+
+                records.push({
+
+                    student_id:
+                        studentId,
+
+                    course_code:
+                        input.getAttribute(
+                            'data-code'
+                        ),
+
+                    descriptive_title:
+                        input.getAttribute(
+                            'data-title'
+                        ),
+
+                    units:
+                        input.getAttribute(
+                            'data-units'
+                        ),
+
+                    grade:
+                        input.value.trim()
+
+                });
+
+            });
+
+
+            /* ---------------------------------------------
+               DISABLE BUTTON WHILE SAVING
+            --------------------------------------------- */
+
+            saveButton.disabled =
+                true;
+
+
+            saveButtonIcon.innerHTML =
+                '⟳';
+
+
+            saveButtonText.innerText =
+                'Saving...';
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        '/api/save-grades',
+                        {
+
+                            method:
+                                'POST',
+
+                            headers: {
+                                'Content-Type':
+                                    'application/json'
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    records:
+                                        records
+                                })
+
+                        }
+                    );
+
+
+                const result =
+                    await response.json();
+
+
+                if (
+                    !response.ok ||
+                    !result.success
+                ) {
+
+                    throw new Error(
+                        result.message ||
+                        'Unable to save grades.'
+                    );
+
+                }
+
+
+                /* ---------------------------------------------
+                   SUCCESS
+                --------------------------------------------- */
+
+                const studentName =
+                    document.getElementById(
+                        'studentName'
+                    ).innerText ||
+                    'The student';
+
+
+                showNotification(
+                    'Grades Saved Successfully',
+                    `${studentName}'s academic grades have been updated successfully.`,
+                    'success'
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    'Save Error:',
+                    error
+                );
+
+
+                showNotification(
+                    'Unable to Save Grades',
+                    error.message ||
+                    'Something went wrong while saving the grades.',
+                    'error'
+                );
+
+
+            } finally {
+
+                /* ---------------------------------------------
+                   RESTORE BUTTON
+                --------------------------------------------- */
+
+                saveButton.disabled =
+                    false;
+
+
+                saveButtonIcon.innerHTML =
+                    '💾';
+
+
+                saveButtonText.innerText =
+                    'Save Grades';
+
+            }
+
+        }
+
+
+        /* =====================================================
+           BASIC HTML ESCAPING
+           Prevents database text from being interpreted as HTML.
+        ===================================================== */
+
+        function escapeHtml(value) {
+
+            return String(value)
+                .replace(
+                    /&/g,
+                    '&amp;'
+                )
+                .replace(
+                    /</g,
+                    '&lt;'
+                )
+                .replace(
+                    />/g,
+                    '&gt;'
+                )
+                .replace(
+                    /"/g,
+                    '&quot;'
+                )
+                .replace(
+                    /'/g,
+                    '&#039;'
+                );
+
+        }
+
+
+        /* =====================================================
+           START PAGE
+        ===================================================== */
 
         loadStudentProfile();
+
     </script>
+
 </body>
+
 </html>
