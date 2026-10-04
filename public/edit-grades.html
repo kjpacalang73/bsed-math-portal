@@ -20,10 +20,6 @@
 
     <style>
 
-        /* =====================================================
-           GENERAL PAGE
-        ===================================================== */
-
         * {
             box-sizing: border-box;
         }
@@ -87,14 +83,16 @@
 
 
         /* =====================================================
-           PAGE TITLE
+           PAGE HEADING
         ===================================================== */
 
         .page-heading {
 
             color: white;
 
-            margin-bottom: 18px;
+            text-align: center;
+
+            margin-bottom: 22px;
 
         }
 
@@ -152,6 +150,16 @@
             border:
                 1px solid
                 rgba(255,255,255,0.8);
+
+            /*
+             * Keeps the profile card visible
+             * while scrolling.
+             */
+            position: sticky;
+
+            top: 15px;
+
+            z-index: 1000;
 
         }
 
@@ -261,78 +269,36 @@
 
 
         /* =====================================================
-           ACTION BAR
+           PROFILE ACTION BUTTONS
         ===================================================== */
 
-        .action-bar {
-
-            position: sticky;
-
-            top: 0;
-
-            z-index: 100;
-
-            margin-top: 16px;
-
-            margin-bottom: 18px;
-
-            background:
-                rgba(255,255,255,0.97);
-
-            backdrop-filter:
-                blur(10px);
-
-            -webkit-backdrop-filter:
-                blur(10px);
-
-            padding:
-                12px 15px;
-
-            border-radius: 10px;
-
-            box-shadow:
-                0 5px 18px
-                rgba(0,0,0,0.20);
+        .profile-actions {
 
             display: flex;
 
-            align-items: center;
+            flex-direction: column;
 
-            justify-content: space-between;
+            gap: 8px;
 
-            gap: 12px;
+            flex-shrink: 0;
 
-        }
-
-
-        .action-label {
-
-            color: #555;
-
-            font-size: 13px;
-
-            font-weight: 500;
+            align-self: center;
 
         }
 
 
-        .action-buttons {
+        .profile-action-button {
 
-            display: flex;
+            width: 105px;
 
-            gap: 10px;
-
-        }
-
-
-        .action-button {
+            height: 40px;
 
             border: none;
 
             border-radius: 7px;
 
             padding:
-                10px 17px;
+                0 16px;
 
             font-family:
                 inherit;
@@ -351,8 +317,6 @@
             align-items: center;
 
             justify-content: center;
-
-            gap: 7px;
 
         }
 
@@ -382,8 +346,6 @@
 
             color: white;
 
-            min-width: 145px;
-
         }
 
 
@@ -409,10 +371,12 @@
 
 
         /* =====================================================
-           GRADES SECTION
+           SPACE BETWEEN PROFILE AND GRADES
         ===================================================== */
 
         .grades-card {
+
+            margin-top: 22px;
 
             background:
                 rgba(255,255,255,0.98);
@@ -427,6 +391,10 @@
 
         }
 
+
+        /* =====================================================
+           GRADES HEADER
+        ===================================================== */
 
         .grades-header {
 
@@ -697,15 +665,17 @@
         @keyframes spin {
 
             to {
+
                 transform:
                     rotate(360deg);
+
             }
 
         }
 
 
         /* =====================================================
-           CUSTOM NOTIFICATION
+           NOTIFICATION
         ===================================================== */
 
         .notification-container {
@@ -883,7 +853,7 @@
 
 
         /* =====================================================
-           RESPONSIVE DESIGN
+           RESPONSIVE
         ===================================================== */
 
         @media (max-width: 700px) {
@@ -892,7 +862,9 @@
 
                 width: 94%;
 
-                margin-top: 20px;
+                margin:
+                    20px auto
+                    40px auto;
 
             }
 
@@ -909,8 +881,6 @@
                 padding: 16px;
 
                 gap: 14px;
-
-                align-items: flex-start;
 
             }
 
@@ -931,32 +901,20 @@
             }
 
 
-            .action-bar {
+            .profile-actions {
 
-                flex-direction: column;
-
-                align-items: stretch;
+                align-self: center;
 
             }
 
 
-            .action-label {
+            .profile-action-button {
 
-                display: none;
+                width: 95px;
 
-            }
+                height: 38px;
 
-
-            .action-buttons {
-
-                width: 100%;
-
-            }
-
-
-            .action-button {
-
-                flex: 1;
+                font-size: 13px;
 
             }
 
@@ -998,6 +956,36 @@
 
             }
 
+
+            .profile-actions {
+
+                width: 100%;
+
+                flex-direction: row;
+
+                justify-content: center;
+
+            }
+
+
+            .profile-action-button {
+
+                width: 105px;
+
+            }
+
+
+            /*
+             * On very small screens the profile card
+             * remains sticky, but is kept compact.
+             */
+
+            .student-header {
+
+                top: 10px;
+
+            }
+
         }
 
     </style>
@@ -1008,11 +996,19 @@
 <body>
 
 
+    <!-- =====================================================
+         NOTIFICATIONS
+    ====================================================== -->
+
     <div
         id="notificationContainer"
         class="notification-container"
     ></div>
 
+
+    <!-- =====================================================
+         MAIN PAGE
+    ====================================================== -->
 
     <main class="page-container">
 
@@ -1040,6 +1036,7 @@
 
         <section class="student-header">
 
+
             <img
                 id="studentPhoto"
                 src="https://placehold.co/150?text=Loading"
@@ -1058,6 +1055,7 @@
                 <p class="student-id">
 
                     Student ID:
+
                     <strong id="studentIdDisplay">
                         Loading...
                     </strong>
@@ -1086,59 +1084,43 @@
 
             </div>
 
-        </section>
 
+            <!-- =================================================
+                 BUTTONS
+            ================================================== -->
 
-        <!-- =================================================
-             ACTION BAR
-        ================================================== -->
-
-        <div class="action-bar">
-
-            <div class="action-label">
-
-                Academic record actions
-
-            </div>
-
-
-            <div class="action-buttons">
+            <div class="profile-actions">
 
                 <button
                     type="button"
-                    class="action-button back-button"
+                    class="profile-action-button back-button"
                     onclick="goBackToAdmin()"
                 >
-
-                    ← Back to Admin
-
+                    Back
                 </button>
 
 
                 <button
                     type="button"
                     id="saveGradesButton"
-                    class="action-button save-button"
+                    class="profile-action-button save-button"
                     onclick="saveGrades()"
                 >
 
-                    <span id="saveButtonIcon">
-                        💾
-                    </span>
-
                     <span id="saveButtonText">
-                        Save Grades
+                        Save
                     </span>
 
                 </button>
 
             </div>
 
-        </div>
+
+        </section>
 
 
         <!-- =================================================
-             GRADES CARD
+             ACADEMIC GRADES
         ================================================== -->
 
         <section class="grades-card">
@@ -1240,6 +1222,7 @@
                 window.location.search
             );
 
+
         const studentId =
             params.get('id');
 
@@ -1273,7 +1256,9 @@
 
 
             const notification =
-                document.createElement('div');
+                document.createElement(
+                    'div'
+                );
 
 
             notification.className =
@@ -1414,7 +1399,7 @@
             try {
 
                 /* ---------------------------------------------
-                   1. LOAD STUDENT PROFILE
+                   LOAD STUDENT PROFILE
                 --------------------------------------------- */
 
                 const profileResponse =
@@ -1448,25 +1433,29 @@
                 document.getElementById(
                     'studentName'
                 ).innerText =
-                    student.name || 'N/A';
+                    student.name ||
+                    'N/A';
 
 
                 document.getElementById(
                     'studentIdDisplay'
                 ).innerText =
-                    student.student_id || 'N/A';
+                    student.student_id ||
+                    'N/A';
 
 
                 document.getElementById(
                     'studentYear'
                 ).innerText =
-                    student.year_level || 'N/A';
+                    student.year_level ||
+                    'N/A';
 
 
                 document.getElementById(
                     'studentStatus'
                 ).innerText =
-                    student.academic_status || 'N/A';
+                    student.academic_status ||
+                    'N/A';
 
 
                 if (
@@ -1489,7 +1478,7 @@
 
 
                 /* ---------------------------------------------
-                   2. LOAD CURRICULUM + GRADES
+                   LOAD CURRICULUM + GRADES
                 --------------------------------------------- */
 
                 const curriculumResponse =
@@ -1576,22 +1565,31 @@
                     row.innerHTML = `
 
                         <td class="course-code">
+
                             ${escapeHtml(
                                 item.course_code || ''
                             )}
+
                         </td>
 
+
                         <td class="course-title">
+
                             ${escapeHtml(
                                 item.descriptive_title || ''
                             )}
+
                         </td>
 
+
                         <td class="units-cell">
+
                             ${escapeHtml(
                                 item.units ?? ''
                             )}
+
                         </td>
+
 
                         <td class="grade-cell">
 
@@ -1687,12 +1685,6 @@
                 );
 
 
-            const saveButtonIcon =
-                document.getElementById(
-                    'saveButtonIcon'
-                );
-
-
             const saveButtonText =
                 document.getElementById(
                     'saveButtonText'
@@ -1769,15 +1761,11 @@
 
 
             /* ---------------------------------------------
-               DISABLE BUTTON WHILE SAVING
+               DISABLE SAVE BUTTON
             --------------------------------------------- */
 
             saveButton.disabled =
                 true;
-
-
-            saveButtonIcon.innerHTML =
-                '⟳';
 
 
             saveButtonText.innerText =
@@ -1795,14 +1783,18 @@
                                 'POST',
 
                             headers: {
+
                                 'Content-Type':
                                     'application/json'
+
                             },
 
                             body:
                                 JSON.stringify({
+
                                     records:
                                         records
+
                                 })
 
                         }
@@ -1863,19 +1855,15 @@
             } finally {
 
                 /* ---------------------------------------------
-                   RESTORE BUTTON
+                   RESTORE SAVE BUTTON
                 --------------------------------------------- */
 
                 saveButton.disabled =
                     false;
 
 
-                saveButtonIcon.innerHTML =
-                    '💾';
-
-
                 saveButtonText.innerText =
-                    'Save Grades';
+                    'Save';
 
             }
 
@@ -1883,29 +1871,33 @@
 
 
         /* =====================================================
-           BASIC HTML ESCAPING
-           Prevents database text from being interpreted as HTML.
+           HTML ESCAPING
         ===================================================== */
 
         function escapeHtml(value) {
 
             return String(value)
+
                 .replace(
                     /&/g,
                     '&amp;'
                 )
+
                 .replace(
                     /</g,
                     '&lt;'
                 )
+
                 .replace(
                     />/g,
                     '&gt;'
                 )
+
                 .replace(
                     /"/g,
                     '&quot;'
                 )
+
                 .replace(
                     /'/g,
                     '&#039;'
