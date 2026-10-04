@@ -1,793 +1,1559 @@
 require('dotenv').config();
+
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
 const multer = require('multer');
+const crypto = require('crypto');
+const path = require('path');
 
 const app = express();
+
 app.use(express.json());
+
+
+// =========================================================
+// ADMIN SESSION SYSTEM
+// =========================================================
+
+const adminSessions = new Map();
+
+const ADMIN_SESSION_DURATION = 8 * 60 * 60 * 1000; // 8 hours
+
+
+function getCookies(req) {
+
+    const cookies = {};
+
+    const cookieHeader = req.headers.cookie;
+
+    if (!cookieHeader) {
+        return cookies;
+    }
+
+    cookieHeader.split(';').forEach(cookie => {
+
+        const parts = cookie.trim().split('=');
+
+        const key = parts.shift();
+
+        const value = parts.join('=');
+
+        if (key) {
+            cookies[key] = decodeURIComponent(value || '');
+        }
+
+    });
+
+    return cookies;
+
+}
+
+
+function getAdminSession(req) {
+
+    const cookies = getCookies(req);
+
+    const sessionToken =
+        cookies.admin_session;
+
+    if (!sessionToken) {
+        return null;
+    }
+
+    const session =
+        adminSessions.get(sessionToken);
+
+    if (!session) {
+        return null;
+    }
+
+    // Check if session has expired
+    if (Date.now() > session.expiresAt) {
+
+        adminSessions.delete(sessionToken);
+
+        return null;
+
+    }
+
+    return session;
+
+}
+
+
+// =========================================================
+// ADMIN API AUTHENTICATION MIDDLEWARE
+// =========================================================
+
+function requireAdmin(req, res, next) {
+
+    const session =
+        getAdminSession(req);
+
+    if (!session) {
+
+        return res.status(401).json({
+            success: false,
+            message: 'Administrator authentication required.'
+        });
+
+    }
+
+    req.adminSession = session;
+
+    next();
+
+}
+
+
+// =========================================================
+// ADMIN PAGE AUTHENTICATION MIDDLEWARE
+// =========================================================
+
+function requireAdminPage(req, res, next) {
+
+    const session =
+        getAdminSession(req);
+
+    if (!session) {
+
+        return res.redirect('/');
+
+    }
+
+    req.adminSession = session;
+
+    next();
+
+}
+
+
+// =========================================================
+// PROTECT ADMIN HTML PAGES
+// =========================================================
+
+// These routes MUST come before express.static().
+
+app.get('/admin.html', requireAdminPage, (req, res) => {
+
+    res.sendFile(
+        path.join(
+            __dirname,
+            'public',
+            'admin.html'
+        )
+    );
+
+});
+
+
+app.get('/edit-grades.html', requireAdminPage, (req, res) => {
+
+    res.sendFile(
+        path.join(
+            __dirname,
+            'public',
+            'edit-grades.html'
+        )
+    );
+
+});
+
+
+// =========================================================
+// NORMAL PUBLIC FILES
+// =========================================================
+
 app.use(express.static('public'));
 
-// Connect to your free Supabase database
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-const upload = multer({ storage: multer.memoryStorage() });
+// =========================================================
+// CONNECT TO SUPABASE
+// =========================================================
 
-// 1. Announcements Route
+const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_KEY
+);
+
+
+const upload = multer({
+    storage: multer.memoryStorage()
+});
+
+
+// =========================================================
+// 1. ANNOUNCEMENTS ROUTE
+// =========================================================
+
 app.get('/announcements', async (req, res) => {
+
     try {
-        const { data: announcements, error } = await supabase
+
+        const {
+            data: announcements,
+            error
+        } = await supabase
+
             .from('Announcements')
+
             .select('*');
 
-        if (error) throw error;
+
+        if (error) {
+            throw error;
+        }
+
 
         let announcementCards = '';
-        if (announcements.length === 0) {
-            announcementCards = `<p style="text-align:center; color:#666;">No recent announcements available.</p>`;
+
+
+        if (
+            !announcements ||
+            announcements.length === 0
+        ) {
+
+            announcementCards = `
+                <p style="text-align:center; color:#666;">
+                    No recent announcements available.
+                </p>
+            `;
+
         } else {
+
             announcements.forEach(item => {
+
                 announcementCards += `
                     <div class="card">
-                        <div class="card-date">Posted on ${new Date(item.created_at).toLocaleDateString()}</div>
-                        <h2 class="card-title">${item.title}</h2>
-                        <p class="card-content">${item.content}</p>
+
+                        <div class="card-date">
+                            Posted on ${new Date(item.created_at).toLocaleDateString()}
+                        </div>
+
+                        <h2 class="card-title">
+                            ${item.title}
+                        </h2>
+
+                        <p class="card-content">
+                            ${item.content}
+                        </p>
+
                     </div>
                 `;
+
             });
+
         }
+
 
         res.send(`
+
             <!DOCTYPE html>
+
             <html lang="en">
+
             <head>
+
                 <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>BSED Mathematics Department Portal</title>
+
+                <meta
+                    name="viewport"
+                    content="width=device-width, initial-scale=1.0"
+                >
+
+                <title>
+                    BSED Mathematics Department Portal
+                </title>
+
+
                 <style>
+
                     :root {
-                        --act-blue: #002244;    
-                        --act-gold: #ffcc00;    
-                        --act-card-blue: rgba(0, 45, 90, 0.85);
-                        --bg-color: #f4f6f9;    
+
+                        --act-blue: #002244;
+
+                        --act-gold: #ffcc00;
+
+                        --act-card-blue:
+                            rgba(0, 45, 90, 0.85);
+
+                        --bg-color: #f4f6f9;
+
                     }
+
+
                     body {
-                        font-family: 'Segoe UI', Arial, sans-serif;
-                        background-color: var(--bg-color);
+
+                        font-family:
+                            'Segoe UI',
+                            Arial,
+                            sans-serif;
+
+                        background-color:
+                            var(--bg-color);
+
                         margin: 0;
+
                         padding: 0;
+
                         color: #333;
+
                     }
+
+
                     header {
+
                         position: relative;
-                        background-image: linear-gradient(rgba(0, 34, 68, 0.85), rgba(0, 34, 68, 0.85)), 
-                                          url('https://lh3.googleusercontent.com/d/1mE3LrHYGmFZ0jgP9k4giyPypXAKnMjLl');
+
+                        background-image:
+                            linear-gradient(
+                                rgba(0, 34, 68, 0.85),
+                                rgba(0, 34, 68, 0.85)
+                            ),
+                            url(
+                                'https://lh3.googleusercontent.com/d/1mE3LrHYGmFZ0jgP9k4giyPypXAKnMjLl'
+                            );
+
                         background-size: cover;
+
                         background-position: center;
+
                         color: white;
+
                         padding: 2rem;
+
                         display: flex;
+
                         justify-content: space-between;
+
                         align-items: center;
-                        border-bottom: 5px solid var(--act-gold);
+
+                        border-bottom:
+                            5px solid var(--act-gold);
+
                     }
+
+
                     .header-left {
+
                         display: flex;
+
                         align-items: center;
+
                         gap: 1.2rem;
+
                     }
+
+
                     .logo-circle {
+
                         width: 75px;
+
                         height: 75px;
+
                         background-color: #fff;
+
                         border-radius: 50%;
+
                         display: flex;
+
                         align-items: center;
+
                         justify-content: center;
-                        border: 2px solid var(--act-gold);
+
+                        border:
+                            2px solid var(--act-gold);
+
                         overflow: hidden;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+
+                        box-shadow:
+                            0 2px 4px
+                            rgba(0,0,0,0.2);
+
                     }
+
+
                     .logo-circle img {
+
                         width: 100%;
+
                         height: 100%;
+
                         object-fit: cover;
+
                     }
+
+
                     .title-area h1 {
-                        font-family: 'Georgia', serif;
+
+                        font-family: Georgia, serif;
+
                         margin: 0;
+
                         font-size: 1.7rem;
+
                         font-weight: normal;
+
                         letter-spacing: 0.5px;
-                        text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+
+                        text-shadow:
+                            1px 1px 3px
+                            rgba(0,0,0,0.5);
+
                     }
+
+
                     .title-area .sub-1 {
+
                         margin: 2px 0 0 0;
+
                         font-size: 0.85rem;
+
                         color: #ddd;
+
                         font-style: italic;
+
                     }
+
+
                     .title-area .sub-2 {
+
                         margin: 4px 0 0 0;
+
                         font-size: 0.8rem;
+
                         color: var(--act-gold);
+
                         font-weight: bold;
+
                         letter-spacing: 0.5px;
+
                     }
+
+
                     .header-right {
+
                         text-align: right;
+
                         font-size: 0.78rem;
+
                         color: #eee;
+
                         line-height: 1.6;
-                        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+
+                        text-shadow:
+                            1px 1px 2px
+                            rgba(0,0,0,0.5);
+
                     }
+
+
                     main {
+
                         max-width: 900px;
+
                         margin: 3rem auto;
+
                         padding: 0 1.5rem;
+
                         min-height: 40vh;
+
                     }
+
+
                     .section-title {
+
                         font-size: 1.4rem;
+
                         color: var(--act-blue);
+
                         font-weight: bold;
-                        border-bottom: 2px solid #ddd;
+
+                        border-bottom:
+                            2px solid #ddd;
+
                         padding-bottom: 0.5rem;
+
                         margin-bottom: 2rem;
+
                         text-transform: uppercase;
+
                     }
+
+
                     .card {
+
                         background: white;
+
                         border-radius: 6px;
+
                         padding: 1.8rem;
+
                         margin-bottom: 1.5rem;
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-                        border-left: 5px solid var(--act-blue);
+
+                        box-shadow:
+                            0 2px 8px
+                            rgba(0,0,0,0.06);
+
+                        border-left:
+                            5px solid var(--act-blue);
+
                     }
+
+
                     .card-date {
+
                         font-size: 0.8rem;
+
                         color: #777;
+
                         margin-bottom: 0.5rem;
+
                     }
+
+
                     .card-title {
-                        margin: 0 0 0.8rem 0;
+
+                        margin:
+                            0 0 0.8rem 0;
+
                         color: var(--act-blue);
+
                         font-size: 1.3rem;
+
                     }
+
+
                     .card-content {
+
                         margin: 0;
+
                         color: #444;
+
                         font-size: 1rem;
+
                     }
+
+
                     footer {
+
                         position: relative;
-                        background-image: linear-gradient(rgba(0, 34, 68, 0.9), rgba(0, 34, 68, 0.9)), 
-                                          url('https://lh3.googleusercontent.com/d/1g9ZQn60WdVOU6TyallLidFy7iKqsX0bu');
+
+                        background-image:
+                            linear-gradient(
+                                rgba(0, 34, 68, 0.9),
+                                rgba(0, 34, 68, 0.9)
+                            ),
+                            url(
+                                'https://lh3.googleusercontent.com/d/1g9ZQn60WdVOU6TyallLidFy7iKqsX0bu'
+                            );
+
                         background-size: cover;
+
                         background-position: center;
+
                         color: white;
-                        padding: 3rem 2rem 2rem 2rem;
+
+                        padding:
+                            3rem
+                            2rem
+                            2rem
+                            2rem;
+
                         margin-top: 5rem;
+
                         text-align: center;
+
                     }
+
+
                     .pillars-container {
+
                         max-width: 1100px;
-                        margin: 0 auto 2.5rem auto;
+
+                        margin:
+                            0 auto 2.5rem auto;
+
                         display: grid;
-                        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+
+                        grid-template-columns:
+                            repeat(
+                                auto-fit,
+                                minmax(200px, 1fr)
+                            );
+
                         gap: 1rem;
+
                         position: relative;
+
                         z-index: 2;
+
                     }
+
+
                     .pillar-box {
-                        background-color: var(--act-card-blue);
-                        border: 1px solid rgba(255,255,255,0.1);
+
+                        background-color:
+                            var(--act-card-blue);
+
+                        border:
+                            1px solid
+                            rgba(255,255,255,0.1);
+
                         border-radius: 6px;
+
                         padding: 1.2rem;
+
                         text-align: center;
+
                         backdrop-filter: blur(3px);
+
                     }
+
+
                     .pillar-title {
+
                         color: var(--act-gold);
+
                         font-weight: bold;
+
                         font-size: 0.95rem;
+
                         margin-bottom: 0.5rem;
+
                         text-transform: uppercase;
+
                     }
+
+
                     .pillar-text {
+
                         font-size: 0.78rem;
+
                         color: #e0e8f0;
+
                         line-height: 1.4;
+
                         margin: 0;
+
                     }
+
+
                     .motto {
-                        font-family: 'Georgia', serif;
+
+                        font-family: Georgia, serif;
+
                         font-style: italic;
+
                         color: var(--act-gold);
+
                         font-size: 1.4rem;
+
                         margin-top: 1rem;
+
                         position: relative;
+
                         z-index: 2;
+
                     }
+
                 </style>
+
             </head>
+
+
             <body>
+
                 <header>
+
                     <div class="header-left">
+
                         <div class="logo-circle">
-                            <img src="https://lh3.googleusercontent.com/d/1s1s802Y7n5PgAX4dLZ6cZzRhYhN_ofTA" alt="ACTI Logo" onerror="this.src='https://placehold.co/100?text=ACT+Logo'">
+
+                            <img
+                                src="https://lh3.googleusercontent.com/d/1s1s802Y7n5PgAX4dLZ6cZzRhYhN_ofTA"
+                                alt="ACTI Logo"
+                                onerror="this.src='https://placehold.co/100?text=ACT+Logo'"
+                            >
+
                         </div>
+
+
                         <div class="title-area">
-                            <h1>Adventist College of Technology, Inc.</h1>
-                            <div class="sub-1">(Formerly: Matutum View Christian College)</div>
-                            <div class="sub-2">An Institution of Faith and Skills Development</div>
+
+                            <h1>
+                                Adventist College of Technology, Inc.
+                            </h1>
+
+                            <div class="sub-1">
+                                (Formerly: Matutum View Christian College)
+                            </div>
+
+                            <div class="sub-2">
+                                An Institution of Faith and Skills Development
+                            </div>
+
                         </div>
+
                     </div>
+
+
                     <div class="header-right">
-                        <div>📍 Prk. 4, Brgy. Acmonan, Tupi, South Cotabato</div>
-                        <div>🌐 acti-edu.ph</div>
-                        <div>👥 Adventist College of Technology, Inc. - ACTI Community</div>
+
+                        <div>
+                            📍 Prk. 4, Brgy. Acmonan, Tupi, South Cotabato
+                        </div>
+
+                        <div>
+                            🌐 acti-edu.ph
+                        </div>
+
+                        <div>
+                            👥 Adventist College of Technology, Inc. - ACTI Community
+                        </div>
+
                     </div>
+
                 </header>
 
+
                 <main>
-                    <div class="section-title">BSED Mathematics Department Updates</div>
+
+                    <div class="section-title">
+                        BSED Mathematics Department Updates
+                    </div>
+
                     ${announcementCards}
+
                 </main>
 
+
                 <footer>
+
                     <div class="pillars-container">
+
                         <div class="pillar-box">
-                            <div class="pillar-title">Vision</div>
-                            <p class="pillar-text">Producing competent graduates in service to God and humanity.</p>
+
+                            <div class="pillar-title">
+                                Vision
+                            </div>
+
+                            <p class="pillar-text">
+                                Producing competent graduates in service to God and humanity.
+                            </p>
+
                         </div>
+
+
                         <div class="pillar-box">
-                            <div class="pillar-title">Mission</div>
-                            <p class="pillar-text">Providing Christ-Centered, holistic Adventist Education.</p>
+
+                            <div class="pillar-title">
+                                Mission
+                            </div>
+
+                            <p class="pillar-text">
+                                Providing Christ-Centered, holistic Adventist Education.
+                            </p>
+
                         </div>
+
+
                         <div class="pillar-box">
-                            <div class="pillar-title">Philosophy</div>
-                            <p class="pillar-text">God is the true source of Adventist Education for life and eternity.</p>
+
+                            <div class="pillar-title">
+                                Philosophy
+                            </div>
+
+                            <p class="pillar-text">
+                                God is the true source of Adventist Education for life and eternity.
+                            </p>
+
                         </div>
+
+
                         <div class="pillar-box">
-                            <div class="pillar-title">Goal</div>
-                            <p class="pillar-text">Ensuring quality teacher training and skills development.</p>
+
+                            <div class="pillar-title">
+                                Goal
+                            </div>
+
+                            <p class="pillar-text">
+                                Ensuring quality teacher training and skills development.
+                            </p>
+
                         </div>
+
                     </div>
-                    <div class="motto">To God be all the Glory!</div>
+
+
+                    <div class="motto">
+                        To God be all the Glory!
+                    </div>
+
                 </footer>
+
             </body>
+
             </html>
+
         `);
-    } catch (error) {
-        console.error('Database Error:', error.message);
-        res.status(500).send('<h2>Internal Server Error</h2><p>Failed to load portal contents.</p>');
-    }
-});
-
-// 2. REGISTRATION ENDPOINT (Handles Photo Upload + Profile Database Entry)
-app.post('/api/register', upload.single('photo'), async (req, res) => {
-    try {
-        const studentData = JSON.parse(req.body.data);
-        const file = req.file;
-
-        if (!file) {
-            return res.status(400).json({ success: false, message: 'Photo upload is required.' });
-        }
-
-        // Upload 1x1 Photo to Supabase Storage
-        const fileExtension = file.originalname.split('.').pop();
-        const filePath = `${studentData.id_number}_${Date.now()}.${fileExtension}`;
-
-        const { data: storageData, error: storageError } = await supabase.storage
-            .from('student-photos')
-            .upload(filePath, file.buffer, {
-                contentType: file.mimetype,
-                upsert: true
-            });
-
-        if (storageError) throw storageError;
-
-        // Get the Public URL of the uploaded image
-        const { data: urlData } = supabase.storage
-            .from('student-photos')
-            .getPublicUrl(filePath);
-
-        const photoUrl = urlData.publicUrl;
-
-        // Insert Student Information into your "Students" Table (Perfectly Aligned Columns)
-        const { data: dbData, error: dbError } = await supabase
-            .from('Students')
-            .insert([{
-                student_id: studentData.id_number,
-                password: studentData.password,
-                email: studentData.email,
-                name: studentData.name,
-                year_level: studentData.year,
-                academic_status: studentData.status,
-                gender: studentData.gender,
-                date_of_birth: studentData.dob,
-                place_of_birth: studentData.pob,
-                present_address: studentData.address,
-                religion: studentData.religion,
-                mobile_number: studentData.mobile,
-                ethnicity: studentData.ethnicity,
-                father_name: studentData.father,
-                father_religion: studentData.father_rel,
-                mother_maiden: studentData.mother,
-                mother_religion: studentData.mother_rel,
-                guardian_name: studentData.guardian,
-                guardian_contact: studentData.guardian_contact,
-                photo_url: photoUrl
-            }]);
-
-        if (dbError) throw dbError;
-
-        res.status(200).json({ success: true, message: 'Registration successful!' });
 
     } catch (error) {
-        console.error('Registration Failure Details:', error);
-        res.status(500).json({ success: false, message: error.message || 'Server processed database insertion error.' });
+
+        console.error(
+            'Database Error:',
+            error.message
+        );
+
+        res.status(500).send(
+            '<h2>Internal Server Error</h2><p>Failed to load portal contents.</p>'
+        );
+
     }
-});
 
-// 3. PROFILE RETRIEVAL ENDPOINT (Fetches data for a specific student ID)
-app.get('/api/profile/:id', async (req, res) => {
-    try {
-        const studentId = req.params.id;
-
-        const { data: profiles, error } = await supabase
-            .from('Students')
-            .select('*')
-            .eq('student_id', studentId);
-
-        if (error) throw error;
-
-        if (!profiles || profiles.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: `No student found with ID: "${studentId}". Make sure it matches exactly what is in your database column.`
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            profile: profiles[0]
-        });
-
-    } catch (error) {
-        console.error('Fetch Profile Failure:', error.message);
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
-});
-
-// 4. LOGIN ENDPOINT (Verifies credentials and determines user role)
-app.post('/api/login', async (req, res) => {
-    try {
-        const { student_id, password } = req.body;
-
-        if (!student_id || !password) {
-            return res.status(400).json({
-                success: false,
-                message: 'Please enter both ID and password.'
-            });
-        }
-
-        const { data: records, error } = await supabase
-            .from('Students')
-            .select('student_id, password, is_admin')
-            .eq('student_id', student_id);
-
-        if (error) throw error;
-
-        if (!records || records.length === 0) {
-            return res.status(401).json({
-                success: false,
-                message: 'Invalid Student ID.'
-            });
-        }
-
-        const user = records[0];
-
-        if (user.password !== password) {
-            return res.status(401).json({
-                success: false,
-                message: 'Incorrect PIN or Password.'
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            message: 'Authentication successful!',
-            student_id: user.student_id,
-            isAdmin: user.is_admin || false
-        });
-
-    } catch (error) {
-        console.error('Login Endpoint Error:', error.message);
-        res.status(500).json({
-            success: false,
-            message: 'An internal error occurred during login.'
-        });
-    }
 });
 
 
-// 5. ADMIN GET ALL STUDENTS ENDPOINT (Filters out admins)
-app.get('/api/admin/students', async (req, res) => {
-    try {
-        const { data: students, error } = await supabase
-            .from('Students')
-            .select(`
-                name,
+// =========================================================
+// 2. REGISTRATION ENDPOINT
+// =========================================================
+
+app.post(
+    '/api/register',
+    upload.single('photo'),
+    async (req, res) => {
+
+        try {
+
+            const studentData =
+                JSON.parse(req.body.data);
+
+            const file =
+                req.file;
+
+
+            if (!file) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        'Photo upload is required.'
+
+                });
+
+            }
+
+
+            // Upload photo to Supabase Storage
+
+            const fileExtension =
+                file.originalname
+                    .split('.')
+                    .pop();
+
+
+            const filePath =
+                `${studentData.id_number}_${Date.now()}.${fileExtension}`;
+
+
+            const {
+                data: storageData,
+                error: storageError
+            } = await supabase.storage
+
+                .from('student-photos')
+
+                .upload(
+                    filePath,
+                    file.buffer,
+                    {
+                        contentType:
+                            file.mimetype,
+
+                        upsert:
+                            true
+                    }
+                );
+
+
+            if (storageError) {
+                throw storageError;
+            }
+
+
+            // Get Public URL
+
+            const {
+                data: urlData
+            } = supabase.storage
+
+                .from('student-photos')
+
+                .getPublicUrl(filePath);
+
+
+            const photoUrl =
+                urlData.publicUrl;
+
+
+            // Insert Student
+
+            const {
+                data: dbData,
+                error: dbError
+            } = await supabase
+
+                .from('Students')
+
+                .insert([{
+
+                    student_id:
+                        studentData.id_number,
+
+                    password:
+                        studentData.password,
+
+                    email:
+                        studentData.email,
+
+                    name:
+                        studentData.name,
+
+                    year_level:
+                        studentData.year,
+
+                    academic_status:
+                        studentData.status,
+
+                    gender:
+                        studentData.gender,
+
+                    date_of_birth:
+                        studentData.dob,
+
+                    place_of_birth:
+                        studentData.pob,
+
+                    present_address:
+                        studentData.address,
+
+                    religion:
+                        studentData.religion,
+
+                    mobile_number:
+                        studentData.mobile,
+
+                    ethnicity:
+                        studentData.ethnicity,
+
+                    father_name:
+                        studentData.father,
+
+                    father_religion:
+                        studentData.father_rel,
+
+                    mother_maiden:
+                        studentData.mother,
+
+                    mother_religion:
+                        studentData.mother_rel,
+
+                    guardian_name:
+                        studentData.guardian,
+
+                    guardian_contact:
+                        studentData.guardian_contact,
+
+                    photo_url:
+                        photoUrl
+
+                }]);
+
+
+            if (dbError) {
+                throw dbError;
+            }
+
+
+            res.status(200).json({
+
+                success: true,
+
+                message:
+                    'Registration successful!'
+
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                'Registration Failure Details:',
+                error
+            );
+
+
+            res.status(500).json({
+
+                success: false,
+
+                message:
+                    error.message ||
+                    'Server processed database insertion error.'
+
+            });
+
+        }
+
+    }
+);
+
+
+// =========================================================
+// 3. PROFILE RETRIEVAL ENDPOINT
+// =========================================================
+
+app.get(
+    '/api/profile/:id',
+    async (req, res) => {
+
+        try {
+
+            const studentId =
+                req.params.id;
+
+
+            const {
+                data: profiles,
+                error
+            } = await supabase
+
+                .from('Students')
+
+                .select('*')
+
+                .eq(
+                    'student_id',
+                    studentId
+                );
+
+
+            if (error) {
+                throw error;
+            }
+
+
+            if (
+                !profiles ||
+                profiles.length === 0
+            ) {
+
+                return res.status(404).json({
+
+                    success: false,
+
+                    message:
+                        `No student found with ID: "${studentId}". Make sure it matches exactly what is in your database column.`
+
+                });
+
+            }
+
+
+            res.status(200).json({
+
+                success: true,
+
+                profile:
+                    profiles[0]
+
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                'Fetch Profile Failure:',
+                error.message
+            );
+
+
+            res.status(500).json({
+
+                success: false,
+
+                message:
+                    error.message
+
+            });
+
+        }
+
+    }
+);
+
+
+// =========================================================
+// 4. LOGIN ENDPOINT
+// =========================================================
+
+app.post(
+    '/api/login',
+    async (req, res) => {
+
+        try {
+
+            const {
                 student_id,
-                year_level,
-                academic_status,
-                gender,
-                religion,
-                email,
-                photo_url,
-                is_admin
-            `)
-            .eq('is_admin', false);
+                password
+            } = req.body;
 
-        if (error) throw error;
 
-        console.log("========================================");
-        console.log("ADMIN STUDENT DATA");
-        console.log("Number of students:", students.length);
-        console.log("First student:", students[0]);
-        console.log("Gender:", students[0]?.gender);
-        console.log("Religion:", students[0]?.religion);
-        console.log("Email:", students[0]?.email);
-        console.log("========================================");
+            if (
+                !student_id ||
+                !password
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        'Please enter both ID and password.'
+
+                });
+
+            }
+
+
+            const {
+                data: records,
+                error
+            } = await supabase
+
+                .from('Students')
+
+                .select(
+                    'student_id, password, is_admin'
+                )
+
+                .eq(
+                    'student_id',
+                    student_id
+                );
+
+
+            if (error) {
+                throw error;
+            }
+
+
+            if (
+                !records ||
+                records.length === 0
+            ) {
+
+                return res.status(401).json({
+
+                    success: false,
+
+                    message:
+                        'Invalid Student ID.'
+
+                });
+
+            }
+
+
+            const user =
+                records[0];
+
+
+            if (
+                user.password !== password
+            ) {
+
+                return res.status(401).json({
+
+                    success: false,
+
+                    message:
+                        'Incorrect PIN or Password.'
+
+                });
+
+            }
+
+
+            // =================================================
+            // CREATE ADMIN SESSION IF USER IS ADMIN
+            // =================================================
+
+            const isAdmin =
+                user.is_admin === true ||
+                user.is_admin === 'true' ||
+                user.is_admin === 1 ||
+                user.is_admin === '1';
+
+
+            if (isAdmin) {
+
+                const sessionToken =
+                    crypto.randomBytes(32).toString('hex');
+
+
+                adminSessions.set(
+                    sessionToken,
+                    {
+
+                        studentId:
+                            user.student_id,
+
+                        expiresAt:
+                            Date.now() +
+                            ADMIN_SESSION_DURATION
+
+                    }
+                );
+
+
+                const isProduction =
+                    process.env.NODE_ENV === 'production';
+
+
+                const cookieParts = [
+
+                    `admin_session=${sessionToken}`,
+
+                    'HttpOnly',
+
+                    'Path=/',
+
+                    `Max-Age=${Math.floor(
+                        ADMIN_SESSION_DURATION / 1000
+                    )}`,
+
+                    'SameSite=Lax'
+
+                ];
+
+
+                if (isProduction) {
+
+                    cookieParts.push(
+                        'Secure'
+                    );
+
+                }
+
+
+                res.setHeader(
+                    'Set-Cookie',
+                    cookieParts.join('; ')
+                );
+
+
+            } else {
+
+                // Remove any old admin session
+                // if this is a regular student.
+
+                const cookies =
+                    getCookies(req);
+
+
+                if (
+                    cookies.admin_session
+                ) {
+
+                    adminSessions.delete(
+                        cookies.admin_session
+                    );
+
+                }
+
+
+                res.setHeader(
+
+                    'Set-Cookie',
+
+                    'admin_session=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax'
+
+                );
+
+            }
+
+
+            res.status(200).json({
+
+                success: true,
+
+                message:
+                    'Authentication successful!',
+
+                student_id:
+                    user.student_id,
+
+                isAdmin:
+                    isAdmin
+
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                'Login Endpoint Error:',
+                error.message
+            );
+
+
+            res.status(500).json({
+
+                success: false,
+
+                message:
+                    'An internal error occurred during login.'
+
+            });
+
+        }
+
+    }
+);
+
+
+// =========================================================
+// ADMIN LOGOUT
+// =========================================================
+
+app.post(
+    '/api/admin/logout',
+    (req, res) => {
+
+        const cookies =
+            getCookies(req);
+
+
+        const sessionToken =
+            cookies.admin_session;
+
+
+        if (sessionToken) {
+
+            adminSessions.delete(
+                sessionToken
+            );
+
+        }
+
+
+        res.setHeader(
+
+            'Set-Cookie',
+
+            'admin_session=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax'
+
+        );
+
 
         res.status(200).json({
+
             success: true,
-            students: students
+
+            message:
+                'Administrator logged out successfully.'
+
         });
 
-    } catch (error) {
-        console.error('Fetch Directory Failure:', error.message);
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
     }
-});
+);
+
+
+// =========================================================
+// 5. ADMIN GET ALL STUDENTS ENDPOINT
+// =========================================================
+
+app.get(
+    '/api/admin/students',
+    requireAdmin,
+    async (req, res) => {
+
+        try {
+
+            const {
+                data: students,
+                error
+            } = await supabase
+
+                .from('Students')
+
+                .select(`
+                    name,
+                    student_id,
+                    year_level,
+                    academic_status,
+                    gender,
+                    religion,
+                    email,
+                    photo_url,
+                    is_admin
+                `)
+
+                .eq(
+                    'is_admin',
+                    false
+                );
+
+
+            if (error) {
+                throw error;
+            }
+
+
+            console.log(
+                "========================================"
+            );
+
+            console.log(
+                "ADMIN STUDENT DATA"
+            );
+
+            console.log(
+                "Number of students:",
+                students.length
+            );
+
+            console.log(
+                "First student:",
+                students[0]
+            );
+
+            console.log(
+                "Gender:",
+                students[0]?.gender
+            );
+
+            console.log(
+                "Religion:",
+                students[0]?.religion
+            );
+
+            console.log(
+                "Email:",
+                students[0]?.email
+            );
+
+            console.log(
+                "========================================"
+            );
+
+
+            res.status(200).json({
+
+                success: true,
+
+                students:
+                    students
+
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                'Fetch Directory Failure:',
+                error.message
+            );
+
+
+            res.status(500).json({
+
+                success: false,
+
+                message:
+                    error.message
+
+            });
+
+        }
+
+    }
+);
 
 
 // =========================================================
 // 6. GET CURRICULUM WITH STUDENT GRADES
 // =========================================================
 
-app.get('/api/get-curriculum-with-grades/:studentId', async (req, res) => {
-
-    try {
-
-        const studentId =
-            String(req.params.studentId || '').trim();
-
-
-        if (!studentId) {
-
-            return res.status(400).json({
-                success: false,
-                message: 'Student ID is required.'
-            });
-
-        }
-
-
-        // -------------------------------------------------
-        // GET ALL CURRICULUM SUBJECTS
-        // -------------------------------------------------
-
-        const {
-            data: curriculum,
-            error: curriculumError
-        } = await supabase
-            .from('curriculum')
-            .select(`
-                id,
-                course_code,
-                descriptive_title,
-                units,
-                year_level,
-                semester
-            `)
-            .order('year_level')
-            .order('semester')
-            .order('course_code');
-
-
-        if (curriculumError) {
-
-            throw curriculumError;
-
-        }
-
-
-        // -------------------------------------------------
-        // GET THIS STUDENT'S RECORDS
-        //
-        // IMPORTANT:
-        // This uses Academic_Records, NOT grades.
-        // -------------------------------------------------
-
-        const {
-            data: academicRecords,
-            error: academicRecordsError
-        } = await supabase
-            .from('Academic_Records')
-            .select(`
-                id,
-                student_id,
-                course_code,
-                descriptive_title,
-                units,
-                grade
-            `)
-            .eq('student_id', studentId);
-
-
-        if (academicRecordsError) {
-
-            throw academicRecordsError;
-
-        }
-
-
-        // -------------------------------------------------
-        // MATCH ACADEMIC RECORDS TO CURRICULUM
-        // -------------------------------------------------
-
-        const gradeMap = {};
-
-
-        (academicRecords || []).forEach(record => {
-
-            const code =
-                String(
-                    record.course_code || ''
-                )
-                .trim()
-                .toLowerCase();
-
-
-            /*
-             * If there are multiple records for the same
-             * course, prefer the one that actually has
-             * a grade.
-             */
-
-            if (
-                gradeMap[code] === undefined ||
-                gradeMap[code] === ''
-            ) {
-
-                gradeMap[code] =
-                    record.grade == null
-                        ? ''
-                        : String(record.grade).trim();
-
-            }
-
-        });
-
-
-        // -------------------------------------------------
-        // COMBINE CURRICULUM + ACADEMIC RECORDS
-        // -------------------------------------------------
-
-        const combinedData =
-            (curriculum || []).map(course => {
-
-                const courseCode =
-                    String(
-                        course.course_code || ''
-                    ).trim();
-
-
-                const normalizedCode =
-                    courseCode.toLowerCase();
-
-
-                const grade =
-                    gradeMap[normalizedCode] ?? '';
-
-
-                return {
-
-                    id:
-                        course.id,
-
-                    course_code:
-                        courseCode,
-
-                    descriptive_title:
-                        course.descriptive_title,
-
-                    units:
-                        course.units,
-
-                    year_level:
-                        course.year_level,
-
-                    semester:
-                        course.semester,
-
-                    grade:
-                        grade
-
-                };
-
-            });
-
-
-        console.log(
-            `Loaded ${academicRecords?.length || 0} Academic_Records for student ${studentId}.`
-        );
-
-
-        console.log(
-            `Loaded ${combinedData.length} curriculum subjects for student ${studentId}.`
-        );
-
-
-        res.status(200).json({
-
-            success: true,
-
-            student_id:
-                studentId,
-
-            data:
-                combinedData
-
-        });
-
-
-    } catch (error) {
-
-        console.error(
-            'Curriculum + Academic Records Error:',
-            error
-        );
-
-
-        res.status(500).json({
-
-            success: false,
-
-            message:
-                error.message
-
-        });
-
-    }
-
-});
-
-
-// =========================================================
-// 7. SAVE STUDENT GRADES TO Academic_Records
-// =========================================================
-
-app.post('/api/save-grades', async (req, res) => {
-
-    try {
-
-        const { records } =
-            req.body;
-
-
-        if (!Array.isArray(records)) {
-
-            return res.status(400).json({
-
-                success: false,
-
-                message:
-                    'Invalid grade records.'
-
-            });
-
-        }
-
-
-        if (records.length === 0) {
-
-            return res.status(400).json({
-
-                success: false,
-
-                message:
-                    'No grades were submitted.'
-
-            });
-
-        }
-
-
-        // -------------------------------------------------
-        // PROCESS EACH SUBJECT
-        // -------------------------------------------------
-
-        for (const record of records) {
+app.get(
+    '/api/get-curriculum-with-grades/:studentId',
+    requireAdmin,
+    async (req, res) => {
+
+        try {
 
             const studentId =
                 String(
-                    record.student_id || ''
+                    req.params.studentId || ''
                 ).trim();
 
 
-            const courseCode =
-                String(
-                    record.course_code || ''
-                ).trim();
+            if (!studentId) {
 
+                return res.status(400).json({
 
-            const descriptiveTitle =
-                String(
-                    record.descriptive_title || ''
-                ).trim();
+                    success: false,
 
+                    message:
+                        'Student ID is required.'
 
-            /*
-             * Academic_Records.units is TEXT according
-             * to your table, so keep it as a string.
-             */
-
-            const units =
-                String(
-                    record.units ?? ''
-                ).trim();
-
-
-            /*
-             * IMPORTANT:
-             *
-             * Grades are LETTER grades in your
-             * Academic_Records table.
-             *
-             * Therefore:
-             *
-             * A
-             * B+
-             * B
-             * C
-             * F
-             *
-             * are stored as TEXT.
-             */
-
-            const grade =
-                String(
-                    record.grade ?? ''
-                ).trim();
-
-
-            if (
-                !studentId ||
-                !courseCode
-            ) {
-
-                continue;
+                });
 
             }
 
 
             // -------------------------------------------------
-            // FIND EXISTING ACADEMIC RECORD
+            // GET ALL CURRICULUM SUBJECTS
             // -------------------------------------------------
 
             const {
-                data: existingRecords,
-                error: findError
+                data: curriculum,
+                error: curriculumError
+            } = await supabase
+
+                .from('curriculum')
+
+                .select(`
+                    id,
+                    course_code,
+                    descriptive_title,
+                    units,
+                    year_level,
+                    semester
+                `)
+
+                .order('year_level')
+
+                .order('semester')
+
+                .order('course_code');
+
+
+            if (curriculumError) {
+                throw curriculumError;
+            }
+
+
+            // -------------------------------------------------
+            // GET THIS STUDENT'S ACADEMIC RECORDS
+            // -------------------------------------------------
+
+            const {
+                data: academicRecords,
+                error: academicRecordsError
             } = await supabase
 
                 .from('Academic_Records')
@@ -796,56 +1562,358 @@ app.post('/api/save-grades', async (req, res) => {
                     id,
                     student_id,
                     course_code,
+                    descriptive_title,
+                    units,
                     grade
                 `)
 
                 .eq(
                     'student_id',
                     studentId
-                )
-
-                .eq(
-                    'course_code',
-                    courseCode
                 );
 
 
-            if (findError) {
+            if (academicRecordsError) {
+                throw academicRecordsError;
+            }
 
-                throw findError;
+
+            // -------------------------------------------------
+            // MATCH ACADEMIC RECORDS TO CURRICULUM
+            // -------------------------------------------------
+
+            const gradeMap = {};
+
+
+            (
+                academicRecords || []
+            ).forEach(record => {
+
+                const code =
+                    String(
+                        record.course_code || ''
+                    )
+                    .trim()
+                    .toLowerCase();
+
+
+                if (
+                    gradeMap[code] === undefined ||
+                    gradeMap[code] === ''
+                ) {
+
+                    gradeMap[code] =
+                        record.grade == null
+                            ? ''
+                            : String(
+                                record.grade
+                            ).trim();
+
+                }
+
+            });
+
+
+            // -------------------------------------------------
+            // COMBINE CURRICULUM + ACADEMIC RECORDS
+            // -------------------------------------------------
+
+            const combinedData =
+                (curriculum || []).map(
+                    course => {
+
+                        const courseCode =
+                            String(
+                                course.course_code || ''
+                            ).trim();
+
+
+                        const normalizedCode =
+                            courseCode.toLowerCase();
+
+
+                        const grade =
+                            gradeMap[
+                                normalizedCode
+                            ] ?? '';
+
+
+                        return {
+
+                            id:
+                                course.id,
+
+                            course_code:
+                                courseCode,
+
+                            descriptive_title:
+                                course.descriptive_title,
+
+                            units:
+                                course.units,
+
+                            year_level:
+                                course.year_level,
+
+                            semester:
+                                course.semester,
+
+                            grade:
+                                grade
+
+                        };
+
+                    }
+                );
+
+
+            console.log(
+                `Loaded ${academicRecords?.length || 0} Academic_Records for student ${studentId}.`
+            );
+
+
+            console.log(
+                `Loaded ${combinedData.length} curriculum subjects for student ${studentId}.`
+            );
+
+
+            res.status(200).json({
+
+                success: true,
+
+                student_id:
+                    studentId,
+
+                data:
+                    combinedData
+
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                'Curriculum + Academic Records Error:',
+                error
+            );
+
+
+            res.status(500).json({
+
+                success: false,
+
+                message:
+                    error.message
+
+            });
+
+        }
+
+    }
+);
+
+
+// =========================================================
+// 7. SAVE STUDENT GRADES TO Academic_Records
+// =========================================================
+
+app.post(
+    '/api/save-grades',
+    requireAdmin,
+    async (req, res) => {
+
+        try {
+
+            const {
+                records
+            } = req.body;
+
+
+            if (
+                !Array.isArray(records)
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        'Invalid grade records.'
+
+                });
+
+            }
+
+
+            if (
+                records.length === 0
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        'No grades were submitted.'
+
+                });
 
             }
 
 
             // -------------------------------------------------
-            // UPDATE EXISTING RECORD
+            // PROCESS EACH SUBJECT
             // -------------------------------------------------
 
-            if (
-                existingRecords &&
-                existingRecords.length > 0
+            for (
+                const record of records
             ) {
 
-                /*
-                 * Normally there should be one record.
-                 *
-                 * If there happens to be more than one,
-                 * update all matching records so the
-                 * student's displayed grade stays consistent.
-                 */
+                const studentId =
+                    String(
+                        record.student_id || ''
+                    ).trim();
 
-                for (
-                    const existingRecord
-                    of existingRecords
+
+                const courseCode =
+                    String(
+                        record.course_code || ''
+                    ).trim();
+
+
+                const descriptiveTitle =
+                    String(
+                        record.descriptive_title || ''
+                    ).trim();
+
+
+                const units =
+                    String(
+                        record.units ?? ''
+                    ).trim();
+
+
+                const grade =
+                    String(
+                        record.grade ?? ''
+                    ).trim();
+
+
+                if (
+                    !studentId ||
+                    !courseCode
                 ) {
 
+                    continue;
+
+                }
+
+
+                // -------------------------------------------------
+                // FIND EXISTING ACADEMIC RECORD
+                // -------------------------------------------------
+
+                const {
+                    data: existingRecords,
+                    error: findError
+                } = await supabase
+
+                    .from('Academic_Records')
+
+                    .select(`
+                        id,
+                        student_id,
+                        course_code,
+                        grade
+                    `)
+
+                    .eq(
+                        'student_id',
+                        studentId
+                    )
+
+                    .eq(
+                        'course_code',
+                        courseCode
+                    );
+
+
+                if (findError) {
+                    throw findError;
+                }
+
+
+                // -------------------------------------------------
+                // UPDATE EXISTING RECORD
+                // -------------------------------------------------
+
+                if (
+                    existingRecords &&
+                    existingRecords.length > 0
+                ) {
+
+                    for (
+                        const existingRecord
+                        of existingRecords
+                    ) {
+
+                        const {
+                            error: updateError
+                        } = await supabase
+
+                            .from(
+                                'Academic_Records'
+                            )
+
+                            .update({
+
+                                descriptive_title:
+                                    descriptiveTitle,
+
+                                units:
+                                    units,
+
+                                grade:
+                                    grade || null
+
+                            })
+
+                            .eq(
+                                'id',
+                                existingRecord.id
+                            );
+
+
+                        if (updateError) {
+                            throw updateError;
+                        }
+
+                    }
+
+                }
+
+
+                // -------------------------------------------------
+                // INSERT NEW RECORD
+                // -------------------------------------------------
+
+                else {
+
                     const {
-                        error: updateError
+                        error: insertError
                     } = await supabase
 
-                        .from('Academic_Records')
+                        .from(
+                            'Academic_Records'
+                        )
 
-                        .update({
+                        .insert([{
+
+                            student_id:
+                                studentId,
+
+                            course_code:
+                                courseCode,
 
                             descriptive_title:
                                 descriptiveTitle,
@@ -856,18 +1924,11 @@ app.post('/api/save-grades', async (req, res) => {
                             grade:
                                 grade || null
 
-                        })
-
-                        .eq(
-                            'id',
-                            existingRecord.id
-                        );
+                        }]);
 
 
-                    if (updateError) {
-
-                        throw updateError;
-
+                    if (insertError) {
+                        throw insertError;
                     }
 
                 }
@@ -875,85 +1936,43 @@ app.post('/api/save-grades', async (req, res) => {
             }
 
 
-            // -------------------------------------------------
-            // INSERT NEW RECORD
-            // -------------------------------------------------
-
-            else {
-
-                const {
-                    error: insertError
-                } = await supabase
-
-                    .from('Academic_Records')
-
-                    .insert([{
-
-                        student_id:
-                            studentId,
-
-                        course_code:
-                            courseCode,
-
-                        descriptive_title:
-                            descriptiveTitle,
-
-                        units:
-                            units,
-
-                        grade:
-                            grade || null
-
-                    }]);
+            console.log(
+                'Grades successfully saved to Academic_Records for:',
+                records[0]?.student_id
+            );
 
 
-                if (insertError) {
+            res.status(200).json({
 
-                    throw insertError;
+                success: true,
 
-                }
+                message:
+                    'Grades saved successfully to Academic_Records.'
 
-            }
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                'Save Grades Error:',
+                error
+            );
+
+
+            res.status(500).json({
+
+                success: false,
+
+                message:
+                    error.message
+
+            });
 
         }
 
-
-        console.log(
-            'Grades successfully saved to Academic_Records for:',
-            records[0]?.student_id
-        );
-
-
-        res.status(200).json({
-
-            success: true,
-
-            message:
-                'Grades saved successfully to Academic_Records.'
-
-        });
-
-
-    } catch (error) {
-
-        console.error(
-            'Save Grades Error:',
-            error
-        );
-
-
-        res.status(500).json({
-
-            success: false,
-
-            message:
-                error.message
-
-        });
-
     }
-
-});
+);
 
 
 // =========================================================
