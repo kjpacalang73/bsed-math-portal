@@ -983,7 +983,7 @@
                 }
 
                 // 2. Fetch Grades Data
-                const gradesResponse = await fetch(`/api/get-curriculum-with-grades/${encodeURIComponent(studentId)}`);
+                const gradesResponse = await fetch(`/api/student-academic-records/${encodeURIComponent(studentId)}`);
                 const result = await gradesResponse.json();
 
                 if (result.success) {
