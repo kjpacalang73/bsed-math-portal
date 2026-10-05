@@ -890,26 +890,59 @@ function displayStudentDirectory(students) {
             </div>
 
 
-            <button
-                type="button"
-                class="view-student-btn"
-                data-student-id="${encodedStudentId}"
-            >
-                VIEW
-            </button>
+            <!-- RIGHT-SIDE ACTION BUTTONS -->
+
+            <div class="student-actions">
+
+                <button
+                    type="button"
+                    class="student-action-btn profile-btn"
+                    data-student-id="${encodedStudentId}"
+                >
+                    View Profile
+                </button>
+
+                <button
+                    type="button"
+                    class="student-action-btn grades-btn"
+                    data-student-id="${encodedStudentId}"
+                >
+                    Edit Grades
+                </button>
+
+            </div>
 
         `;
 
 
-        const viewButton =
-            card.querySelector(
-                ".view-student-btn"
+        const profileButton =
+            card.querySelector(".profile-btn");
+
+
+        const gradesButton =
+            card.querySelector(".grades-btn");
+
+
+        if (profileButton) {
+
+            profileButton.addEventListener(
+                "click",
+                function (event) {
+
+                    event.stopPropagation();
+
+                    window.location.href =
+                        `profile.html?id=${encodedStudentId}`;
+
+                }
             );
 
+        }
 
-        if (viewButton) {
 
-            viewButton.addEventListener(
+        if (gradesButton) {
+
+            gradesButton.addEventListener(
                 "click",
                 function (event) {
 
@@ -922,17 +955,6 @@ function displayStudentDirectory(students) {
             );
 
         }
-
-
-        card.addEventListener(
-            "click",
-            function () {
-
-                window.location.href =
-                    `edit-grades.html?id=${encodedStudentId}`;
-
-            }
-        );
 
 
         gridContainer.appendChild(card);

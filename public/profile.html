@@ -834,6 +834,34 @@ footer div:last-child {
     }
 }
 
+/* =========================
+   ADMIN BACK BUTTON
+   ========================= */
+
+.admin-back-btn {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: #002244;
+    color: #ffffff;
+    border: 1px solid #ffcc00;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-bottom: 18px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.admin-back-btn:hover {
+    background: #003b73;
+    color: #ffcc00;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(0, 34, 68, 0.25);
+}
+
     </style>
 </head>
 <body>
@@ -893,7 +921,18 @@ footer div:last-child {
         <div id="scroll-anchor" style="position: absolute; top: 0; height: 1px; width: 1px;"></div>
         <div class="container">
             <h1 class="welcome-header">Welcome, ACTInian!</h1>
-            
+            <div class="container">
+
+    <a
+        href="admin.html"
+        id="adminBackButton"
+        class="admin-back-btn"
+    >
+        <i class="fa-solid fa-arrow-left"></i>
+        Back to Admin Dashboard
+    </a>
+
+    <h1 class="welcome-header">Welcome, ACTInian!</h1>
             <!-- Profile Header Card -->
             <div class="profile-card">
                 <div class="profile-pic-frame">
@@ -1022,7 +1061,16 @@ footer div:last-child {
         // 1. Retrieve the ID saved by your login script
 const params = new URLSearchParams(window.location.search);
         let studentId = params.get('id');
-        
+        // Show the Admin Dashboard button only when an admin is viewing a student profile
+const adminBackButton = document.getElementById('adminBackButton');
+
+if (adminBackButton && params.get('id')) {
+    const isAdmin = sessionStorage.getItem('isAdmin');
+
+    if (isAdmin === 'true') {
+        adminBackButton.style.display = 'inline-flex';
+    }
+}
         if (!studentId || studentId === 'Loading...' || studentId.trim() === '') {
             studentId = sessionStorage.getItem('student_id');
         } else {
