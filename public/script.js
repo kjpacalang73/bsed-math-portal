@@ -622,3 +622,7 @@ function showNotification(
     }, 3000);
 
 }
+
+sessionStorage.removeItem('profile_from_admin');
+sessionStorage.setItem('student_id', result.student_id);
+sessionStorage.setItem('isAdmin', result.isAdmin);

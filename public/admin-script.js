@@ -931,8 +931,8 @@ function displayStudentDirectory(students) {
 
                     event.stopPropagation();
 
-                    window.location.href =
-                        `profile.html?id=${encodedStudentId}`;
+                    window.location.href = 
+                    `profile.html?id=${encodedStudentId}&from=admin`;
 
                 }
             );

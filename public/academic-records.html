@@ -873,11 +873,11 @@
         <!-- Menu Items -->
         <ul class="sidebar-menu">
             <li>
-                <a href="/profile.html">
-                    <i class="fa-solid fa-user"></i>
-                    <span>Student Profile</span>
-                </a>
-            </li>
+    <a href="javascript:void(0)" onclick="goToStudentProfile()">
+        <i class="fa-solid fa-user"></i>
+        <span>Student Profile</span>
+    </a>
+</li>
             <li class="active">
                 <a href="javascript:void(0)" class="nav-link">
                     <i class="fa-solid fa-graduation-cap"></i> 
@@ -1243,6 +1243,20 @@
     requestAnimationFrame(() => {
         modal.classList.add("show");
     });
+}
+
+function goToStudentProfile() {
+    const fromAdmin =
+        params.get('from') === 'admin';
+
+    let profileUrl =
+        `profile.html?id=${encodeURIComponent(studentId)}`;
+
+    if (fromAdmin) {
+        profileUrl += '&from=admin';
+    }
+
+    window.location.href = profileUrl;
 }
 
 window.logout = logout;
